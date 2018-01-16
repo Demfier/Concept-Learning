@@ -48,7 +48,7 @@ def simple_closure(s, implications):
     Examples
     ========
 
-    >>> from fca.implication import Implication
+    >>> from implications import Implication
     >>> cd2a = Implication(set(('c', 'd')), set(('a')))
     >>> ad2c = Implication(set(('a', 'd')), set(('c')))
     >>> ab2cd = Implication(set(('a', 'b')), set(('c', 'd')))
@@ -97,7 +97,7 @@ def lin_closure(s, implications):
     Examples
     ========
 
-    >>> from fca.implication import Implication
+    >>> from implications import Implication
     >>> cd2a = Implication(set(('c', 'd')), set(('a')))
     >>> ad2c = Implication(set(('a', 'd')), set(('c')))
     >>> ab2cd = Implication(set(('a', 'b')), set(('c', 'd')))
@@ -158,15 +158,15 @@ def closure(current, base_set, implications, prefLen):
 
     while (old_closure != new_closure):
         old_closure = copy.copy(new_closure)
-        delete_list = [];
+        delete_list = []
 
         for imp in unused_imps:
             if imp.get_premise() <= new_closure:
                 new_closure |= imp.get_conclusion()
 
                 for x in base_set[:prefLen]:
-                    if (((x in new_closure) and not (x in current))
-                        or (not (x in new_closure) and (x in current))):
+                    if (((x in new_closure) and not (x in current)) or
+                        (not (x in new_closure) and (x in current))):
                         return False, set()
 
                 delete_list.append(imp)
