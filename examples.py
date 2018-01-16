@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Author: Gaurav Sahu, 10:00 16th January, 2018
 
@@ -9,7 +10,7 @@ Contains usage examples for the contexts module.
     - generate concept-lattice from concepts
 """
 
-import fca
+import concept_context as cnct
 
 if __name__ == '__main__':
     # a simple object-attribute relation illustration using toy-example of
@@ -82,7 +83,7 @@ if __name__ == '__main__':
                  ('VARIG', 'Asia Pacific'), ('VARIG', 'Africa'),
                  ('VARIG', 'Mexico'), ('VARIG', 'United States')]
 
-    concepts = fca.formalConcepts(relation)
+    concepts = cnct.formalConcepts(relation)
     concepts.computeLattice()
     print("Star Alliance Airlines example")
     print(concepts)

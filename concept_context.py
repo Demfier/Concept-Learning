@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Author: Gaurav Sahu, 09:28 16th January, 2018
 

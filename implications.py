@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Author: Gaurav Sahu, 23:20 15th January, 2018
 
@@ -96,8 +97,3 @@ class Implication(object):
             # Assume a partial example
             return (self.conclusion <= some_set[1] or
                     not self.premise <= some_set[0])
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
