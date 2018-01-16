@@ -255,8 +255,8 @@ class formalConcepts:
         return neighbours
 
     def computeLowerNeighbours(self, concept, minsize=0):
-        """ This dual version of upperNeighbours runs fast enough in Python to be useful.
-        Based on a theorem from C. Lindig's (1999) PhD thesis.
+        """ This dual version of upperNeighbours runs fast enough in Python to
+        be useful. Based on a theorem from C. Lindig's (1999) PhD thesis.
         Returns list of upper neighbours of concept. Ignores lower neighbours
         with less than minextent objects in extent."""
 
@@ -280,8 +280,8 @@ class formalConcepts:
                 curConcept = self.extentToConceptDict[extent]
                 intent = curConcept.intent
             else:
-                # Store every concept in self.conceptDict, because it will eventually be used
-                # and the closure is expensive to compute
+                # Store every concept in self.conceptDict, because it will
+                # eventually be used and the closure is expensive to compute
                 intent = self.context.objectsPrime(extent)
                 curConcept = formalConcept(
                     extent, intent, self.context.indexList(intent))
@@ -295,7 +295,7 @@ class formalConcepts:
 
         neighbours = []
         # find all lower neighbours by dual of Lindig's theorem:
-        # a concept C=((I u i)',(I u i)'') is a lower neighbour of (G,I) if and only if
+        # a concept C=((I u i)',(I u i)'') is a lower neighbour of (G,I) iff
         # (I u i)'' \ I = set of all i which generated C.
         for extent, generatingAttributes in lowerNeighbourCandidates.iteritems():
             extraAttributes = self.extentToConceptDict[extent].intent.difference(
@@ -326,8 +326,8 @@ class formalConcepts:
         print "Done with introduced objects and attributes"
 
     def computeLattice(self):
-        """ Computes concepts and lattice.
-        self.concepts contains lectically ordered list of concepts after completion."""
+        """ Computes concepts and lattice. self.concepts contains lectically
+        ordered list of concepts after completion."""
         intent = self.context.objectsPrime(set())
         extent = self.context.attributesPrime(intent)
         curConcept = formalConcept(
@@ -362,8 +362,8 @@ class formalConcepts:
         print "Done computing lattice"
 
     def computeMinExtentLattice(self, minextent=0):
-        """ Computes concepts and lattice.
-        self.concepts contains lectically ordered list of concepts after completion."""
+        """ Computes concepts and lattice. self.concepts contains lectically
+        ordered list of concepts after completion."""
         extent = self.context.attributesPrime(set())
         intent = self.context.objectsPrime(extent)
         curConcept = formalConcept(
@@ -397,7 +397,8 @@ class formalConcepts:
         self.numberConceptsAndComputeIntroduced()
 
     def checkLowerNeighbours(self, concept, nonMembers):
-        """Helper for checkDownset. Remove all elements from nonMembers which are in the downset of concept."""
+        """Helper for checkDownset. Remove all elements from nonMembers which
+        are in the downset of concept."""
         if len(nonMembers) == 0:
             return
         for ln in concept.lowerNeighbours:
@@ -408,7 +409,8 @@ class formalConcepts:
         concept.visited = True
 
     def checkDownset(self, topConcept, nonMembers):
-        """Remove all elements from nonMembers which are in the downset of topConcept."""
+        """Remove all elements from nonMembers which are in the downset of
+        topConcept."""
         for con in self.concepts:
             con.visited = False
         self.checkLowerNeighbours(topConcept, nonMembers)
@@ -500,7 +502,8 @@ class formalConcepts:
         return oldConNum - len(self.concepts)
 
     def getLowerNeighbours(self, con):
-        """ Get all lower neighbours of con. Concept must be in self.concepts!!!"""
+        """Get all lower neighbours of con. Concept must be in
+        self.concepts!!!"""
         # every concept which is < con in the lectic order is a potential lower
         # neighbour
         lowerNeighbourCandidates = filter(lambda c: c.intent.issuperset(
@@ -518,7 +521,8 @@ class formalConcepts:
         return lowerNeighbours
 
     def getUpperNeighbours(self, con):
-        """ Get all upper neighbours of concept. Concept must be in self.concepts!!!"""
+        """Get all upper neighbours of concept. Concept must be in
+        self.concepts!!!"""
         # every concept which is > con in the lectic order is a potential upper
         # neighbour
         upperNeighbourCandidates = filter(lambda c: c.intent.issubset(
@@ -557,7 +561,8 @@ class formalConcepts:
         self.numberConceptsAndComputeIntroduced()
 
     def pruneNoIntroduced(self, noAttrib=True, noObject=True):
-        """Starting from the bottom, prune all concepts that do not introduce at least one attribute (if noAttrib) and/or at least one object (if noObject)
+        """Starting from the bottom, prune all concepts that do not introduce
+        at least one attribute (if noAttrib) and/or at least one object (if noObject)
         Leaves top concept. Return number of pruned concepts"""
         oldConNum = len(self.concepts)
         numpruned = 0
@@ -584,7 +589,10 @@ class formalConcepts:
         return numpruned
 
     def computeAttributeDownsets(self):
-        """Iterate through all concepts and compute set of attributes which are introduced in the downset of each concept. Iteration is done in inverse lectic order, therefore each concept needs to check only its immediate subordinates."""
+        """Iterate through all concepts and compute set of attributes which are
+        introduced in the downset of each concept. Iteration is done in
+        inverse lectic order, therefore each concept needs to check only its
+        immediate subordinates."""
         for con in reversed(self.concepts):
             con.downsetAttributes = set(con.intent)
             for ccon in con.lowerNeighbours:
@@ -617,7 +625,9 @@ class formalConcepts:
                 break
 
     def computeClosestIntroducedAttributes(self, num=5):
-        """Iterate through all concepts and find at most num introduced attributes of closest upper neighbours of. These attributes can then serve as concept name."""
+        """Iterate through all concepts and find at most num introduced
+        attributes of closest upper neighbours of. These attributes can then
+        serve as concept name."""
 
         totnum = len(self.concepts)
         i = 0
@@ -630,8 +640,9 @@ class formalConcepts:
         print "Named %d concepts" % totnum
 
     def findClosestIntroducedAttributes(self, concept, num):
-        """Find at least num attributes that were introduced closest to concept in upward direction.
-        This is useful for naming concepts which introduce no attributes by which they could be named."""
+        """Find at least num attributes that were introduced closest to concept
+        in upward direction. This is useful for naming concepts which introduce
+        no attributes by which they could be named."""
         for con in self.concepts:
             con.visited = False
         conceptDeque = collections.deque([concept])
@@ -646,7 +657,8 @@ class formalConcepts:
         return set(attlist)
 
     def findLargestConcept_closure(self, attribList, startConcept):
-        """find the largest concept which has all the attributes in attribList, starting at startConcept. Return None if no such concept exists."""
+        """find the largest concept which has all the attributes in attribList,
+        starting at startConcept. Return None if no such concept exists."""
         attSet = set(attribList)
         objSet = self.context.attributesPrime(attSet)
         if len(objSet) == 0:
@@ -676,7 +688,8 @@ class formalConcepts:
             attribList,
             startConcept=None,
             nextLower=True):
-        """find the largest concept which has all the attributes in attribList, starting at startConcept. Return None if no such concept exists."""
+        """find the largest concept which has all the attributes in attribList,
+        starting at startConcept. Return None if no such concept exists."""
         for att in attribList:
             if att not in self.context.attributesToObjects:
                 return None
@@ -712,7 +725,9 @@ class formalConcepts:
         return None
 
     def insertNewConcept(self, attribList, numNames=5):
-        """Compute closure of attrib list and insert into graph if extent is not empty. Return new concept or None (if extent is empty). returns tuple (concept,isNew)"""
+        """Compute closure of attrib list and insert into graph if extent is
+        not empty. Return new concept or None (if extent is empty).
+        returns tuple (concept,isNew)"""
         for att in attribList:
             if att not in self.context.attributesToObjects:
                 return (None, False)
@@ -779,8 +794,9 @@ class formalConcepts:
             colorlist=None):
         """Print ordered concept set in dot style.
         outStream: open, writeable stream to plot into.
-        if extentView(extent,intent) is supplied, it needs to be a function that takes the extent and intent as an argument and
-        returns an image filename for it, which will be plotted in the node.
+        if extentView(extent,intent) is supplied, it needs to be a function that
+        takes the extent and intent as an argument and returns an image
+        filename for it, which will be plotted in the node.
         showObjects,showAttributes= show {all|none|introduced} objects/attributes in the concept nodes.
         colorlist: draw concept boundary in colors from that list, cycle."""
         self.enumerateConcepts()
@@ -841,7 +857,9 @@ class formalConcepts:
         return strrep
 
     def __getstate__(self):
-        """Concepts contain references to parents/children. This may lead to a stack overflow during pickling if the lattice is large. Thus, translate concept references into concept numbers before pickling."""
+        """Concepts contain references to parents/children. This may lead to a
+        stack overflow during pickling if the lattice is large. Thus, translate
+        concept references into concept numbers before pickling."""
 
         dictcopy = self.__dict__.copy()
         dictcopy["concepts"] = []
@@ -867,7 +885,10 @@ class formalConcepts:
         return dictcopy
 
     def __setstate__(self, thedict):
-        """Concepts contain references to parents/children. This may lead to a stack overflow during pickling if the lattice is large. Thus, translate concept references into concept numbers before pickling and vice versa on unpickling."""
+        """Concepts contain references to parents/children. This may lead to a
+        stack overflow during pickling if the lattice is large. Thus, translate
+        concept references into concept numbers before pickling and vice versa
+        on unpickling."""
         cnumToRefs = dict()
         for con in thedict["concepts"]:
             cnumToRefs[con.cnum] = con

@@ -1,6 +1,10 @@
 """
 Author: Gaurav Sahu, 23:42 14th January, 2018
 
-Implements the concept lattice as defined in Formal Concept Analysis along with
-its algebraic operations.
+Implements the concept-lattice and its algebraic operations.
+
+Classes/Methods implemented here:
+
+1. conceptLattice - Generate concept lattice from a given
+                    formal context
 """
