@@ -1,5 +1,11 @@
-import implications as imp
+# -*- coding: utf-8 -*-
+"""
+Author: Gaurav Sahu, 14:39 16th January, 2018
 
+Contains methods needed for computing basis
+"""
+
+import implications as imp
 import closure_operators
 
 
