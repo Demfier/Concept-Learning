@@ -87,7 +87,8 @@ if __name__ == '__main__':
     concepts.computeLattice()
     print("Star Alliance Airlines example")
     print(concepts)
-    print
+    concepts.computeCanonicalBasis()
+    print(concepts.canonical_basis)
 
     # write to a dot file
     # Note: use linux command dot starAlliance.dot -Tpng -o starAlliance.png

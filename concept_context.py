@@ -18,7 +18,12 @@ import bisect
 import collections
 import sys
 import gc
+import copy
 from functools import reduce
+
+import closure_operators
+from implications import Implication
+import basis
 
 
 class formalConcept:
@@ -361,6 +366,17 @@ class formalConcepts:
 
         self.numberConceptsAndComputeIntroduced()
         print "Done computing lattice"
+
+    def computeCanonicalBasis(self, close=closure_operators.lin_closure,
+                              imp_basis=[], cond=lambda x: True):
+        """Computes Duquenne-Guigues basis for the context using
+        optimized Ganter algorithm"""
+        aclose = lambda attributes: closure_operators.aclosure(attributes,
+                                                               self.context)
+        self.canonical_basis = basis.generalizedComputeDgBasis(
+            self.context.attributes, aclose,
+            imp_basis=imp_basis, cond=cond)
+        print "Done computing canonical basis"
 
     def computeMinExtentLattice(self, minextent=0):
         """ Computes concepts and lattice. self.concepts contains lectically

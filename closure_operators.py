@@ -14,7 +14,7 @@ def oprime(objects, context):
     """
     attributes = set(context.attributes[:])
     for o in objects:
-        attributes &= context.get_object_intent(o)
+        attributes &= context.objectsPrime({o})
     return attributes
 
 
@@ -26,7 +26,7 @@ def aprime(attributes, context):
     """
     objects = set(context.objects[:])
     for a in attributes:
-        objects &= context.get_attribute_extent(a)
+        objects &= context.attributesPrime({a})
     return objects
 
 
