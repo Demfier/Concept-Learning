@@ -195,3 +195,44 @@ def generalizedComputeDgBasis(attributes, aclose,
                     i = j
                     break
     return relative_basis
+
+
+def horn1(formal_concept, membership_oracle, equivalence_oracle):
+    """Computes DG Basis for a given set of attributes using horn1 algorithm
+    """
+    attributes = formal_concept.attributes
+    hypothesis = []
+    while True:
+        # NOTE: counter_example is a set
+        counter_example = equivalence_oracle(hypothesis)
+        # Check if the oracle returns a counter_example
+        if counter_example['counter_example'] is None:
+            break
+        else:
+            for idx, implication in enumerate(hypothesis):
+                # if an implication doesn't repect the counter example,
+                # modify it's conclusion (also called strengthening)
+                if not is_respected(implication, counter_example):
+                    hypothesis[idx] = imp.Implication(
+                        implication.premise,
+                        implication.conclusion.intersection(counter_example))
+                else:
+                    # special_implication (A --> B) is the first implication
+                    # such that it's premise(A) is not a subset of
+                    # counter_example(C) and member(C ∩ A) is false. The latter
+                    # condition can also be interpreted as C ∩ A is not a model
+                    # of context(K)
+                    special_implication = imp.findSpecialImplication(
+                        hypothesis,
+                        membership_oracle,
+                        counter_example)
+                    if special_implication:
+                        hypothesis[idx] = imp.Implication(
+                            counter_example.intersection(implication.premise),
+                            implication.conclusion.union(
+                                implication.premise.difference(counter_example)))
+                    else:
+                        hypothesis.append(imp.Implication(
+                            counter_example,
+                            formal_concept.attributes))
+    return hypothesis

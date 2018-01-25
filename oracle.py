@@ -2,7 +2,7 @@
 """
 Author: Gaurav Sahu, 14:59 16th January, 2018
 
-Implements Query class containing queries to be used for PAC-Learning
+Implements the six types of oracles to be used for PAC-Learning
 For more information, see:
  - D. Angluin: Queries and Concept Learning, 1988
  - D. Borchmann, T. Hanika and S. Obiedkov: On the Usability of Probabaly
@@ -12,7 +12,7 @@ For more information, see:
 import random
 
 
-class Query(object):
+class Oracle(object):
     """Contains the six type of queries used in PAC"""
 
     def __init__(self, _input):

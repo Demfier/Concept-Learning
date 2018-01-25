@@ -24,6 +24,7 @@ from functools import reduce
 import closure_operators
 from implications import Implication
 import basis
+import oracle
 
 
 class formalConcept:
@@ -368,14 +369,22 @@ class formalConcepts:
         print "Done computing lattice"
 
     def computeCanonicalBasis(self, close=closure_operators.lin_closure,
-                              imp_basis=[], cond=lambda x: True):
+                              imp_basis=[]):
         """Computes Duquenne-Guigues basis for the context using
         optimized Ganter algorithm"""
         aclose = lambda attributes: closure_operators.aclosure(attributes,
                                                                self.context)
-        self.canonical_basis = basis.generalizedComputeDgBasis(
-            self.context.attributes, aclose,
-            imp_basis=imp_basis, cond=cond)
+        # Computes canonical basis using Ganter's algorithm. Doesn't involve
+        # oracles
+        # self.canonical_basis = basis.generalizedComputeDgBasis(
+        #     self.context.attributes, aclose,
+        #     imp_basis=imp_basis, cond=lambda x: True)
+
+        # Computes canonical basis using horn1 algorithm. Involves member? and
+        # equivalent? oracles
+        self.canonical_basis = basis.horn1(self,
+                                           Oracle.member,
+                                           Oracle.equivalent)
         print "Done computing canonical basis"
 
     def computeMinExtentLattice(self, minextent=0):

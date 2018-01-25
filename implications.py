@@ -83,7 +83,8 @@ class Implication(object):
             return -1
 
     def is_respected(self, some_set):
-        """Checks whether `some_set` respects an implication or not"""
+        """Checks whether implication repects `some_set or not.
+        In other words, is `some_set` a model of implication?"""
         # if some_set contains every element from premise and not every
         # element from conclusion then it doesn't respect an implication
         # TODO: refactor
@@ -93,3 +94,17 @@ class Implication(object):
             # Assume a partial example
             return (self.conclusion <= some_set[1] or
                     not self.premise <= some_set[0])
+
+    def findSpecialImplication(implications, membership_oracle,
+                               counter_example):
+        """Returns first implication (A --> B) such that it's premise(A)
+        is not a subset of counter_example(C) and
+        member(C ∩ A) is false. The latter condition can also be interpreted as
+        C ∩ A is not a model of context(K).
+        """
+        for implication in implications:
+            if counter_example.intersection(implication.premise) \
+             != implication.premise and not \
+             membership_oracle(counter_example.intersection(implication.premise)):
+                return implication
+        return None
