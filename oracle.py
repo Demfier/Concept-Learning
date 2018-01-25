@@ -25,7 +25,7 @@ def equivalent(_input_set, formal_concept, closure_operator, restricted=False):
     context or not. If not, returns a counter-example.
     Here _input_set (H) is a set of implications of the form A --> B,
     context_intents = Int(K)"""
-    if !isinstance(_input, set) or !isinstance(intents, set):
+    if not isinstance(_input, set) or not isinstance(intents, set):
         print "Inputs must be a set for the equivalence query"
     else:
         # input = intents
@@ -41,7 +41,7 @@ def equivalent(_input_set, formal_concept, closure_operator, restricted=False):
 
 def subset(restricted=False):
     """Will tell if the input is a subset of the target hypothesis"""
-    if !isinstance(_input, set):
+    if not isinstance(_input, set):
         print "Input must be a set for the subset query"
     else:
         # _input ⊆ targetHypothesis
@@ -54,7 +54,7 @@ def subset(restricted=False):
 
 def superset(restricted=False):
     """Will tell if the input is a superset of the target hypothesis"""
-    if !isinstance(_input, set):
+    if not isinstance(_input, set):
         print "Input must be a set for the superset query"
     else:
         # _input ⊇ targetHypothesis
@@ -67,7 +67,7 @@ def superset(restricted=False):
 
 def disjoint(restricted=False):
     """Will tell if the input is disjoint from target hypothesis"""
-    if !isinstance(_input, set):
+    if not isinstance(_input, set):
         print "Input must be a set for the disjointness query"
     else:
         # _input ∩ targetHyothesis = ϕ
