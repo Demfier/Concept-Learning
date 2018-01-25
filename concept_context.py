@@ -383,8 +383,9 @@ class formalConcepts:
         # Computes canonical basis using horn1 algorithm. Involves member? and
         # equivalent? oracles
         self.canonical_basis = basis.horn1(self,
-                                           Oracle.member,
-                                           Oracle.equivalent)
+                                           aclose,
+                                           oracle.member,
+                                           oracle.equivalent)
         print "Done computing canonical basis"
 
     def computeMinExtentLattice(self, minextent=0):

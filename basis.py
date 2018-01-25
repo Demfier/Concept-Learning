@@ -197,14 +197,16 @@ def generalizedComputeDgBasis(attributes, aclose,
     return relative_basis
 
 
-def horn1(formal_concept, membership_oracle, equivalence_oracle):
+def horn1(formal_concept, closure_operator, membership_oracle,
+          equivalence_oracle):
     """Computes DG Basis for a given set of attributes using horn1 algorithm
     """
     attributes = formal_concept.attributes
     hypothesis = []
     while True:
         # NOTE: counter_example is a set
-        counter_example = equivalence_oracle(hypothesis)
+        counter_example = equivalence_oracle(hypothesis, formal_concept,
+                                             closure_operator)
         # Check if the oracle returns a counter_example
         if counter_example['counter_example'] is None:
             break
@@ -225,6 +227,7 @@ def horn1(formal_concept, membership_oracle, equivalence_oracle):
                     special_implication = imp.findSpecialImplication(
                         hypothesis,
                         membership_oracle,
+                        closure_operator,
                         counter_example)
                     if special_implication:
                         hypothesis[idx] = imp.Implication(

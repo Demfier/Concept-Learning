@@ -96,7 +96,7 @@ class Implication(object):
                     not self.premise <= some_set[0])
 
     def findSpecialImplication(implications, membership_oracle,
-                               counter_example):
+                               closure_operator, counter_example):
         """Returns first implication (A --> B) such that it's premise(A)
         is not a subset of counter_example(C) and
         member(C ∩ A) is false. The latter condition can also be interpreted as
@@ -104,7 +104,8 @@ class Implication(object):
         """
         for implication in implications:
             if counter_example.intersection(implication.premise) \
-             != implication.premise and not \
-             membership_oracle(counter_example.intersection(implication.premise)):
+             != implication.premise and not membership_oracle(
+                 counter_example.intersection(implication.premise),
+                 closure_operator):
                 return implication
         return None
