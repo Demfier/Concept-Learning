@@ -53,7 +53,6 @@ def approx_equivalent(_input_set, membership_oracle, formal_concept,
 def approx_equivalent_lambda(_input_set, membership_oracle,
                              formal_concept, closure_operator,
                              i, epsilon, delta):
-    i += 1
     l_i = math.ceil((i - math.log(delta, 2)) / epsilon)
     context_attributes = formal_concept.context.attributes
     for j in range(int(l_i)):
