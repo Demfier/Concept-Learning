@@ -7,6 +7,7 @@ Contains methods needed for computing basis
 
 import implications as imp
 import closure_operators
+import oracle
 
 
 def kclosure(s, k, cxt):
@@ -198,15 +199,26 @@ def generalizedComputeDgBasis(attributes, aclose,
 
 
 def horn1(formal_concept, closure_operator, membership_oracle,
-          equivalence_oracle):
+          equivalence_oracle=None):
     """Computes DG Basis for a given set of attributes using horn1 algorithm
     """
     attributes = formal_concept.context.attributes
     hypothesis = set(frozenset({imp.Implication(set(), set())}))
+
+    i = 0  # number of equivalence queries
     while True:
         # NOTE: counter_example is a set
-        counter_example = equivalence_oracle(set(hypothesis), formal_concept,
-                                             closure_operator)
+        counter_example = {}
+        if equivalence_oracle:
+            counter_example = equivalence_oracle(set(hypothesis),
+                                                 formal_concept,
+                                                 closure_operator)
+        else:
+            i += 1
+            counter_example = oracle.approx_equivalent(
+                set(hypothesis), membership_oracle, formal_concept,
+                closure_operator, i, epsilon=0.1, delta=0.1)
+
         # Check if the oracle returns a counter_example
         if counter_example['value'] is None:
             break
@@ -246,3 +258,7 @@ def horn1(formal_concept, closure_operator, membership_oracle,
                             counter_example['value'],
                             set(formal_concept.context.attributes)))
     return hypothesis
+
+
+def pac_basis(formal_concept, closure_operator, membership_oracle):
+    return horn1(formal_concept, closure_operator, membership_oracle)

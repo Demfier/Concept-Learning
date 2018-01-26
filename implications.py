@@ -110,3 +110,15 @@ def findSpecialImplication(implications, membership_oracle,
              closure_operator):
             return implication
     return None
+
+
+def is_respected(implications, some_set):
+    """Checks where some_set respects a set of implications
+    """
+    for impl in implications:
+        if not impl.is_respected:
+            return False
+        else:
+            continue
+    return True
+    return

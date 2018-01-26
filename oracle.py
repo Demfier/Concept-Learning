@@ -10,6 +10,8 @@ For more information, see:
 """
 
 import random
+import math
+import implications as imp
 
 
 def member(_input_set, closure_operator):
@@ -39,6 +41,30 @@ def equivalent(_input_set, formal_concept, closure_operator, restricted=False):
             return({'bool': False, 'value': genCounterExample(
                 nature, formal_concept, _input_set, closure_operator,
                 oracle_type='equivalence')})
+
+
+def approx_equivalent(_input_set, membership_oracle, formal_concept,
+                      closure_operator, i, epsilon=0.1, delta=0.1):
+    return approx_equivalent_lambda(_input_set, membership_oracle,
+                                    formal_concept, closure_operator,
+                                    i, epsilon, delta)
+
+
+def approx_equivalent_lambda(_input_set, membership_oracle,
+                             formal_concept, closure_operator,
+                             i, epsilon, delta):
+    i += 1
+    l_i = math.ceil((i - math.log(delta, 2)) / epsilon)
+    context_attributes = formal_concept.context.attributes
+    for j in range(int(l_i)):
+        # random subset of attributes
+        sample = set(random.sample(
+                    context_attributes,
+                    random.choice(range(len(context_attributes)))))
+        if (membership_oracle(sample, closure_operator) and not imp.is_respected(_input_set, sample)) or\
+           (not membership_oracle(sample, closure_operator) and imp.is_respected(_input_set, sample)):
+            return {'bool': False, 'value': sample}
+    return {'bool': True, 'value': None}
 
 
 def subset(restricted=False):
@@ -121,7 +147,7 @@ def closed_in_implication_set(counter_example, _input_set):
     for implication in _input_set:
         if not implication.premise.issubset(counter_example) or \
           implication.conclusion.issubset(counter_example):
-            return True
-        else:
             continue
-    return False
+        else:
+            return False
+    return True
