@@ -9,6 +9,8 @@ import implications as imp
 import closure_operators
 import oracle
 
+import sys
+
 
 def kclosure(s, k, cxt):
     """Return the closure of s in cxt restricted to the first k attributes."""
@@ -202,63 +204,92 @@ def horn1(formal_concept, closure_operator, membership_oracle,
           equivalence_oracle=None):
     """Computes DG Basis for a given set of attributes using horn1 algorithm
     """
-    attributes = formal_concept.context.attributes
     hypothesis = set(frozenset({imp.Implication(set(), set())}))
 
-    i = 0  # number of equivalence queries
+    # NOTE: counter_example is a set
     while True:
-        # NOTE: counter_example is a set
-        counter_example = {}
-        if equivalence_oracle:
-            counter_example = equivalence_oracle(set(hypothesis),
-                                                 formal_concept,
-                                                 closure_operator)
-        else:
-            i += 1
-            counter_example = oracle.approx_equivalent(
-                set(hypothesis), membership_oracle, formal_concept,
-                closure_operator, i, epsilon=0.1, delta=0.1)
-
-        # Check if the oracle returns a counter_example
+        counter_example = equivalence_oracle(
+            set(hypothesis), formal_concept, membership_oracle, closure_operator)
         if counter_example['value'] is None:
             break
-        else:
-            for idx, implication in enumerate(hypothesis.copy()):
-                # if an implication doesn't repect the counter example,
-                # modify it's conclusion (also called strengthening)
-                if not implication.is_respected(counter_example['value']):
-                    hypothesis = list(hypothesis)
-                    hypothesis[idx] = imp.Implication(
-                        implication.premise,
-                        implication.conclusion.intersection(
-                            counter_example['value']))
-                    hypothesis = set(hypothesis)
+
+        for idx, implication in enumerate(list(hypothesis.copy())):
+            # if an implication doesn't repect the counter example,
+            # modify it's conclusion (also called strengthening)
+            if not implication.is_respected(counter_example['value']):
+                hypothesis.remove(implication)
+                hypothesis.add(imp.Implication(
+                    implication.premise,
+                    implication.conclusion.intersection(
+                        counter_example['value'])))
+            else:
+                # special_implication (A --> B) is the first implication
+                # such that it's premise(A) is not a subset of
+                # counter_example(C) and member(C ∩ A) is false. The latter
+                # condition can also be interpreted as C ∩ A is not a model
+                # of context(K)
+                special_implication = imp.findSpecialImplication(
+                    hypothesis,
+                    membership_oracle,
+                    closure_operator,
+                    counter_example['value'])
+                if special_implication:
+                    hypothesis.remove(special_implication)
+                    hypothesis.add(imp.Implication(
+                        counter_example['value'].intersection(
+                            special_implication.premise),
+                        special_implication.conclusion.union(
+                            special_implication.premise.difference(
+                                counter_example['value']))))
                 else:
-                    # special_implication (A --> B) is the first implication
-                    # such that it's premise(A) is not a subset of
-                    # counter_example(C) and member(C ∩ A) is false. The latter
-                    # condition can also be interpreted as C ∩ A is not a model
-                    # of context(K)
-                    special_implication = imp.findSpecialImplication(
-                        hypothesis,
-                        membership_oracle,
-                        closure_operator,
-                        counter_example['value'])
-                    if special_implication:
-                        hypothesis = list(hypothesis)
-                        hypothesis[idx] = imp.Implication(
-                            counter_example['value'].intersection(
-                                implication.premise),
-                            implication.conclusion.union(
-                                implication.premise.difference(
-                                    counter_example['value'])))
-                        hypothesis = set(hypothesis)
-                    else:
-                        hypothesis.add(imp.Implication(
-                            counter_example['value'],
-                            set(formal_concept.context.attributes)))
+                    hypothesis.add(imp.Implication(
+                        counter_example['value'],
+                        set(formal_concept.context.attributes)))
     return hypothesis
 
 
 def pac_basis(formal_concept, closure_operator, membership_oracle):
-    return horn1(formal_concept, closure_operator, membership_oracle)
+    hypothesis = set(frozenset({imp.Implication(set(), set())}))
+    # NOTE: counter_example is a set
+    i = 0  # number of queries
+    while True:
+        counter_example = oracle.approx_equivalent(
+            set(hypothesis), membership_oracle, formal_concept,
+            closure_operator, i, 0.2, 0.1)
+
+        if counter_example['value'] is None:
+            break
+        i += 1
+        for implication in hypothesis.copy():
+            # if an implication doesn't repect the counter example,
+            # modify it's conclusion (also called strengthening)
+            if not implication.is_respected(counter_example['value']):
+                hypothesis.remove(implication)
+                hypothesis.add(imp.Implication(
+                    implication.premise,
+                    implication.conclusion.intersection(
+                        counter_example['value'])))
+            else:
+                # special_implication (A --> B) is the first implication
+                # such that it's premise(A) is not a subset of
+                # counter_example(C) and member(C ∩ A) is false. The latter
+                # condition can also be interpreted as C ∩ A is not a model
+                # of context(K)
+                special_implication = imp.findSpecialImplication(
+                    hypothesis,
+                    membership_oracle,
+                    closure_operator,
+                    counter_example['value'])
+                if special_implication:
+                    hypothesis.remove(special_implication)
+                    hypothesis.add(imp.Implication(
+                        counter_example['value'].intersection(
+                            special_implication.premise),
+                        special_implication.conclusion.union(
+                            special_implication.premise.difference(
+                                counter_example['value']))))
+                else:
+                    hypothesis.add(imp.Implication(
+                        counter_example['value'],
+                        set(formal_concept.context.attributes)))
+    return hypothesis

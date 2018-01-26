@@ -11,6 +11,7 @@ Contains usage examples for the contexts module.
 """
 
 import concept_context as cnct
+import time
 
 if __name__ == '__main__':
     # a simple object-attribute relation illustration using toy-example of
@@ -82,13 +83,14 @@ if __name__ == '__main__':
     relation += [('VARIG', 'Latin America'), ('VARIG', 'Europe'),
                  ('VARIG', 'Asia Pacific'), ('VARIG', 'Africa'),
                  ('VARIG', 'Mexico'), ('VARIG', 'United States')]
-
+    start = time.clock()
     concepts = cnct.formalConcepts(relation)
     concepts.computeLattice()
     print("Star Alliance Airlines example")
     print(concepts)
     concepts.computeCanonicalBasis()
     print(concepts.canonical_basis)
+    print(time.clock() - start)
 
     # write to a dot file
     # Note: use linux command dot starAlliance.dot -Tpng -o starAlliance.png

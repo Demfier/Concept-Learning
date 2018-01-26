@@ -169,7 +169,7 @@ def closure(current, base_set, implications, prefLen):
 
                 for x in base_set[:prefLen]:
                     if (((x in new_closure) and not (x in current)) or
-                        (not (x in new_closure) and (x in current))):
+                            (not (x in new_closure) and (x in current))):
                         return False, set()
 
                 delete_list.append(imp)
