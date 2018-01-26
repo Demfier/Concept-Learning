@@ -25,16 +25,18 @@ def equivalent(_input_set, formal_concept, closure_operator, restricted=False):
     context or not. If not, returns a counter-example.
     Here _input_set (H) is a set of implications of the form A --> B,
     context_intents = Int(K)"""
-    if not isinstance(_input, set) or not isinstance(intents, set):
+    intents = [concept.intent for concept in formal_concept.concepts]
+    intents = set(intents)
+    if not isinstance(_input_set, set) or not isinstance(intents, set):
         print "Inputs must be a set for the equivalence query"
     else:
         # input = intents
-        if _input == intents:
-            return {'bool': True, 'counter_example': None}
+        if _input_set == intents:
+            return {'bool': True, 'value': None}
         else:
             # choose whether to return a +ve or -ve counter-example
             nature = random.choice([1, 0])
-            return({'bool': False, 'counter_example': genCounterExample(
+            return({'bool': False, 'value': genCounterExample(
                 nature, formal_concept, _input_set, closure_operator,
                 oracle_type='equivalence')})
 
@@ -46,9 +48,9 @@ def subset(restricted=False):
     else:
         # _input ⊆ targetHypothesis
         if _input.issubset(targetHypothesis):
-            return {'bool': True, 'counter_example': None}
+            return {'bool': True, 'value': None}
         else:
-            return {'bool': False, 'counter_example': random.choice(list(
+            return {'bool': False, 'value': random.choice(list(
                 _input.difference(targetHypothesis)))}
 
 
@@ -59,9 +61,9 @@ def superset(restricted=False):
     else:
         # _input ⊇ targetHypothesis
         if _input.issuperset(targetHypothesis):
-            return {'bool': True, 'counter_example': None}
+            return {'bool': True, 'value': None}
         else:
-            return {'bool': False, 'counter_example': random.choice(list(
+            return {'bool': False, 'value': random.choice(list(
                 targetHypothesis.difference(_input)))}
 
 
@@ -72,9 +74,9 @@ def disjoint(restricted=False):
     else:
         # _input ∩ targetHyothesis = ϕ
         if _input.intersection(targetHypothesis) == set([]):
-            return {'bool': True, 'counter_example': None}
+            return {'bool': True, 'value': None}
         else:
-            return {'bool': False, 'counter_example': random.choice(list(
+            return {'bool': False, 'value': random.choice(list(
                 _input.intersection(targetHypothesis)))}
 
 
@@ -83,11 +85,12 @@ def exhaustive(restricted=False):
 
 
 def genCounterExample(nature, formal_concept, _input_set,
-                      oracle_type='equivalence'):
+                      closure_operator, oracle_type='equivalence'):
     """Leaving room for generating counter-examples for other types of
     oracles too"""
     if oracle_type == 'equivalence':
-        intents = formal_concept.context.intent
+        intents = [concept.intent for concept in formal_concept.concepts]
+        intents = set(intents)
         if nature:
             # generate positive counter-example
             # Such a counter-example C ⊆ Int(K)
@@ -96,18 +99,29 @@ def genCounterExample(nature, formal_concept, _input_set,
             # generate negative counter-example
             # Such a counter-example C is closed in H but not K
             context_attributes = formal_concept.context.attributes
+            potential_counter_example = set()
             while True:
                 potential_counter_example = set(random.sample(
                     context_attributes,
                     random.choice(range(len(context_attributes)))))
-
                 # Check for negative counter example
                 if closed_in_implication_set(
                     potential_counter_example, _input_set) and \
                     sorted(potential_counter_example) != \
                         closure_operator(potential_counter_example):
-                    return potential_counter_example
+                        break
                 else:
                     # Generate another counter example
                     continue
+            return potential_counter_example
     return None
+
+
+def closed_in_implication_set(counter_example, _input_set):
+    for implication in _input_set:
+        if not implication.premise.issubset(counter_example) or \
+          implication.conclusion.issubset(counter_example):
+            return True
+        else:
+            continue
+    return False

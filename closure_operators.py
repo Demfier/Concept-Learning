@@ -26,7 +26,10 @@ def aprime(attributes, context):
     """
     objects = set(context.objects[:])
     for a in attributes:
-        objects &= context.attributesPrime({a})
+        if isinstance(a, str):
+            objects &= context.attributesPrime({a})
+        else:
+            objects &= context.attributesPrime(a)
     return objects
 
 

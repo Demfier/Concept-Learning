@@ -201,23 +201,26 @@ def horn1(formal_concept, closure_operator, membership_oracle,
           equivalence_oracle):
     """Computes DG Basis for a given set of attributes using horn1 algorithm
     """
-    attributes = formal_concept.attributes
-    hypothesis = []
+    attributes = formal_concept.context.attributes
+    hypothesis = set(frozenset({imp.Implication(set(), set())}))
     while True:
         # NOTE: counter_example is a set
-        counter_example = equivalence_oracle(hypothesis, formal_concept,
+        counter_example = equivalence_oracle(set(hypothesis), formal_concept,
                                              closure_operator)
         # Check if the oracle returns a counter_example
-        if counter_example['counter_example'] is None:
+        if counter_example['value'] is None:
             break
         else:
-            for idx, implication in enumerate(hypothesis):
+            for idx, implication in enumerate(hypothesis.copy()):
                 # if an implication doesn't repect the counter example,
                 # modify it's conclusion (also called strengthening)
-                if not is_respected(implication, counter_example):
+                if not implication.is_respected(counter_example['value']):
+                    hypothesis = list(hypothesis)
                     hypothesis[idx] = imp.Implication(
                         implication.premise,
-                        implication.conclusion.intersection(counter_example))
+                        implication.conclusion.intersection(
+                            counter_example['value']))
+                    hypothesis = set(hypothesis)
                 else:
                     # special_implication (A --> B) is the first implication
                     # such that it's premise(A) is not a subset of
@@ -228,14 +231,18 @@ def horn1(formal_concept, closure_operator, membership_oracle,
                         hypothesis,
                         membership_oracle,
                         closure_operator,
-                        counter_example)
+                        counter_example['value'])
                     if special_implication:
+                        hypothesis = list(hypothesis)
                         hypothesis[idx] = imp.Implication(
-                            counter_example.intersection(implication.premise),
+                            counter_example['value'].intersection(
+                                implication.premise),
                             implication.conclusion.union(
-                                implication.premise.difference(counter_example)))
+                                implication.premise.difference(
+                                    counter_example['value'])))
+                        hypothesis = set(hypothesis)
                     else:
-                        hypothesis.append(imp.Implication(
-                            counter_example,
-                            formal_concept.attributes))
+                        hypothesis.add(imp.Implication(
+                            counter_example['value'],
+                            set(formal_concept.context.attributes)))
     return hypothesis
