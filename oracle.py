@@ -19,7 +19,7 @@ def member(_input_set, closure_operator):
     Tells if the given element is present in the target hypothesis
     """
     # _input ∈ targetHypothesis
-    return(_input_set == closure_operator(_input_set))
+    return(_input_set == set(closure_operator(_input_set)))
 
 
 def equivalent(_input_set, formal_concept, membership_oracle,
@@ -33,13 +33,12 @@ def equivalent(_input_set, formal_concept, membership_oracle,
     else:
         # input = intents
         for i in range(pow(2, len(formal_concept.context.attributes))):
+            # sample potential_counter_example => set(['b', 'd'])
             potential_counter_example = genCounterExample(formal_concept)
-            if (membership_oracle(
-                    potential_counter_example, closure_operator) and not
-                imp.is_respected(_input_set, potential_counter_example) or
-                (not membership_oracle(
-                    potential_counter_example, closure_operator) and
-                    imp.is_respected(_input_set, potential_counter_example))):
+            is_member = membership_oracle(potential_counter_example,
+                                          closure_operator)
+            respects = imp.is_respected(_input_set, potential_counter_example)
+            if ((is_member and not respects) or (not is_member and respects)):
                 return {'bool': False, 'value': potential_counter_example}
         return {'bool': True, 'value': None}
 
@@ -50,10 +49,9 @@ def approx_equivalent(_input_set, membership_oracle, formal_concept,
     l_i = math.floor((i - math.log(delta, 2)) / epsilon)
     for i in range(int(l_i)):
         sample = genCounterExample(formal_concept)
-        if (membership_oracle(sample, closure_operator) and not
-                imp.is_respected(_input_set, sample) or
-                (not membership_oracle(sample, closure_operator) and
-                    imp.is_respected(_input_set, sample))):
+        is_member = membership_oracle(sample, closure_operator)
+        respects = imp.is_respected(_input_set, sample)
+        if ((is_member and not respects) or (not is_member and respects)):
             return {'bool': False, 'value': sample}
     return {'bool': True, 'value': None}
 
@@ -108,5 +106,6 @@ def genCounterExample(formal_concept, oracle_type='equivalence'):
         attributes = formal_concept.context.attributes
         counter_example = set()
         for attr in attributes:
-            counter_example.add(random.choice(attributes))
+            if random.random() > 0.5:
+                counter_example.add(attr)
         return counter_example

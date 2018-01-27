@@ -145,24 +145,6 @@ def is_concept(p):
     return len(p) == 2
 
 
-if __name__ == '__main__':
-    import time
-    import sys
-
-    def timeit(algo, cxt):
-        start = time.time()
-        basis = algo(cxt)
-        end = time.time()
-        print len(basis), end - start
-        return basis, end - start
-
-    cxt = fca.read_cxt(sys.argv[1])
-    print 'Ganter:'
-    timeit(fca.compute_dg_basis, cxt)
-    print 'Incremental:'
-    timeit(canonical_basis, cxt)
-
-
 def generalizedComputeDgBasis(attributes, aclose,
                               close=closure_operators.simple_closure,
                               imp_basis=[],
@@ -204,24 +186,35 @@ def horn1(formal_concept, closure_operator, membership_oracle,
           equivalence_oracle=None):
     """Computes DG Basis for a given set of attributes using horn1 algorithm
     """
-    hypothesis = set(frozenset({imp.Implication(set(), set())}))
-
+    hypothesis = set()
     # NOTE: counter_example is a set
     while True:
+        # sample `hypothesis` => set([a, e, d => c, b])
         counter_example = equivalence_oracle(
-            set(hypothesis), formal_concept, membership_oracle, closure_operator)
+            hypothesis,
+            formal_concept,
+            membership_oracle,
+            closure_operator)
+        # terminating condition
         if counter_example['value'] is None:
             break
 
-        for idx, implication in enumerate(list(hypothesis.copy())):
+        # starting edge case
+        if len(hypothesis) == 0:
+            hypothesis.add(imp.Implication(
+                frozenset(counter_example['value']),
+                frozenset(formal_concept.context.attributes)))
+            continue
+
+        for implication in hypothesis.copy():
             # if an implication doesn't repect the counter example,
             # modify it's conclusion (also called strengthening)
             if not implication.is_respected(counter_example['value']):
                 hypothesis.remove(implication)
                 hypothesis.add(imp.Implication(
-                    implication.premise,
-                    implication.conclusion.intersection(
-                        counter_example['value'])))
+                    frozenset(implication.premise),
+                    frozenset(implication.conclusion.intersection(
+                                            counter_example['value']))))
             else:
                 # special_implication (A --> B) is the first implication
                 # such that it's premise(A) is not a subset of
@@ -236,11 +229,11 @@ def horn1(formal_concept, closure_operator, membership_oracle,
                 if special_implication:
                     hypothesis.remove(special_implication)
                     hypothesis.add(imp.Implication(
-                        counter_example['value'].intersection(
-                            special_implication.premise),
-                        special_implication.conclusion.union(
-                            special_implication.premise.difference(
-                                counter_example['value']))))
+                        frozenset(counter_example['value'].intersection(
+                                                    special_implication.premise)),
+                        frozenset(special_implication.conclusion.union(
+                                                    special_implication.premise.difference(
+                                                        counter_example['value'])))))
                 else:
                     hypothesis.add(imp.Implication(
                         counter_example['value'],
@@ -249,16 +242,23 @@ def horn1(formal_concept, closure_operator, membership_oracle,
 
 
 def pac_basis(formal_concept, closure_operator, membership_oracle):
-    hypothesis = set(frozenset({imp.Implication(set(), set())}))
+    hypothesis = set()
     # NOTE: counter_example is a set
     i = 0  # number of queries
     while True:
         counter_example = oracle.approx_equivalent(
             set(hypothesis), membership_oracle, formal_concept,
-            closure_operator, i, 0.2, 0.1)
+            closure_operator, i, 0.1, 0.1)
 
         if counter_example['value'] is None:
             break
+
+        if len(hypothesis) == 0:
+            hypothesis.add(imp.Implication(
+                counter_example['value'],
+                set(formal_concept.context.attributes)))
+            continue
+
         i += 1
         for implication in hypothesis.copy():
             # if an implication doesn't repect the counter example,

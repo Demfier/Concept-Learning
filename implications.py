@@ -32,42 +32,39 @@ class Implication(object):
     True
     """
 
-    def __init__(self, premise=set(), conclusion=set()):
+    def __init__(self, premise_=frozenset(), conclusion_=frozenset()):
         """
         Create implication from two sets of attributes
         """
-        self._premise = premise
-        self._conclusion = conclusion
+        self.premise = premise_
+        self.conclusion = conclusion_
 
     def __deepcopy__(self, memo):
-        return Implication(self._premise.copy(), self._conclusion.copy())
+        return Implication(self.premise.copy(), self.conclusion.copy())
 
     def get_premise(self):
         """
         Return premise of implication
         """
-        return self._premise
+        return self.premise
 
     def get_conclusion(self):
         """
         Return conclusion of implication
         """
-        return self._conclusion
+        return self.conclusion
 
     def get_reduced_conclusion(self):
-        return self._conclusion - self._premise
-
-    premise = property(get_premise)
-    conclusion = property(get_reduced_conclusion)
+        return self.conclusion - self.premise
 
     def __repr__(self):
         try:
-            premise = ", ".join([element for element in self._premise])
-            short_conclusion = self._conclusion - self._premise
+            premise = ", ".join([element for element in self.premise])
+            short_conclusion = self.conclusion - self.premise
             conclusion = ", ".join([element for element in short_conclusion])
         except BaseException:
-            premise = ", ".join([str(element) for element in self._premise])
-            short_conclusion = self._conclusion - self._premise
+            premise = ", ".join([str(element) for element in self.premise])
+            short_conclusion = self.conclusion - self.premise
             conclusion = ", ".join([str(element)
                                     for element in short_conclusion])
         return " => ".join((premise, conclusion,))
@@ -76,11 +73,21 @@ class Implication(object):
         return self.__repr__()
 
     def __cmp__(self, other):
-        if ((self._premise == other.premise) and
-                (self._conclusion == other.conclusion)):
+        if ((self.premise == other.premise) and
+                (self.conclusion == other.conclusion)):
             return 0
         else:
             return -1
+
+    def __hash__(self):
+        return hash(frozenset((frozenset(self.premise),
+                    frozenset(self.conclusion))))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return(self.premise == other.premise and
+               self.conclusion == other.conclusion)
 
     def is_respected(self, some_set):
         """Checks whether implication repects `some_set or not.
@@ -89,11 +96,12 @@ class Implication(object):
         # element from conclusion then it doesn't respect an implication
         # TODO: refactor
         if isinstance(some_set, set):
-            return self.conclusion <= some_set or not self.premise <= some_set
+            return(self.conclusion.issubset(some_set) or not
+                   self.premise.issubset(some_set))
         else:
             # Assume a partial example
-            return (self.conclusion <= some_set[1] or
-                    not self.premise <= some_set[0])
+            return (self.conclusion.issubset(some_set[1]) or
+                    not self.premise.issubset(some_set[0]))
 
 
 def findSpecialImplication(implications, membership_oracle,
@@ -105,7 +113,7 @@ def findSpecialImplication(implications, membership_oracle,
     """
     for implication in implications:
         if counter_example.intersection(implication.premise) \
-         != implication.premise and not membership_oracle(
+           != implication.premise and not membership_oracle(
              counter_example.intersection(implication.premise),
              closure_operator):
             return implication
