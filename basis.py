@@ -214,7 +214,7 @@ def horn1(formal_concept, closure_operator, membership_oracle,
                 hypothesis.add(imp.Implication(
                     frozenset(implication.premise),
                     frozenset(implication.conclusion.intersection(
-                                            counter_example['value']))))
+                        counter_example['value']))))
             else:
                 # special_implication (A --> B) is the first implication
                 # such that it's premise(A) is not a subset of
@@ -230,10 +230,10 @@ def horn1(formal_concept, closure_operator, membership_oracle,
                     hypothesis.remove(special_implication)
                     hypothesis.add(imp.Implication(
                         frozenset(counter_example['value'].intersection(
-                                                    special_implication.premise)),
+                            special_implication.premise)),
                         frozenset(special_implication.conclusion.union(
-                                                    special_implication.premise.difference(
-                                                        counter_example['value'])))))
+                            special_implication.premise.difference(
+                                counter_example['value'])))))
                 else:
                     hypothesis.add(imp.Implication(
                         counter_example['value'],

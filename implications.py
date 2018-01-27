@@ -81,7 +81,7 @@ class Implication(object):
 
     def __hash__(self):
         return hash(frozenset((frozenset(self.premise),
-                    frozenset(self.conclusion))))
+                               frozenset(self.conclusion))))
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -114,8 +114,8 @@ def findSpecialImplication(implications, membership_oracle,
     for implication in implications:
         if counter_example.intersection(implication.premise) \
            != implication.premise and not membership_oracle(
-             counter_example.intersection(implication.premise),
-             closure_operator):
+                counter_example.intersection(implication.premise),
+                closure_operator):
             return implication
     return None
 

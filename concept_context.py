@@ -372,8 +372,8 @@ class formalConcepts:
                               imp_basis=[]):
         """Computes Duquenne-Guigues basis for the context using
         optimized Ganter algorithm"""
-        aclose = lambda attributes: closure_operators.aclosure(attributes,
-                                                               self.context)
+        def aclose(attributes): return closure_operators.aclosure(attributes,
+                                                                  self.context)
         # Computes canonical basis using Ganter's algorithm. Doesn't involve
         # oracles
         # self.canonical_basis = basis.generalizedComputeDgBasis(
