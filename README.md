@@ -1,4 +1,4 @@
-# Concept-Leraning
+# Concept-Learning
 > A module for FCA and Query-Learning
 
 Contains the implementation of algorithms mentioned in
