@@ -1,5 +1,5 @@
 # Concept-Leraning
->> A module for FCA and Query-Learning
+> A module for FCA and Query-Learning
 
 Contains the implementation of algorithms mentioned in
   * [Queries and Concept Learning](https://link.springer.com/content/pdf/10.1023/A:1022821128753.pdf) (1988): Dana Angluin
