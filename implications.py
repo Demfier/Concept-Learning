@@ -112,8 +112,8 @@ def findSpecialImplication(implications, membership_oracle,
     C ∩ A is not a model of context(K).
     """
     for implication in implications:
-        if counter_example.intersection(implication.premise) \
-           != implication.premise and not membership_oracle(
+        if not implication.premise.issubset(counter_example) \
+            and not membership_oracle(
                 counter_example.intersection(implication.premise),
                 closure_operator):
             return implication

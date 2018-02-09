@@ -8,6 +8,7 @@ Contains methods needed for computing basis
 import implications as imp
 import closure_operators
 import oracle
+import helper
 
 import sys
 
@@ -241,14 +242,15 @@ def horn1(formal_concept, closure_operator, membership_oracle,
     return hypothesis
 
 
-def pac_basis(formal_concept, closure_operator, membership_oracle):
+def pac_basis(formal_concept, closure_operator, membership_oracle,
+              epsilon=0.1, delta=0.1):
     hypothesis = set()
     # NOTE: counter_example is a set
     i = 0  # number of queries
     while True:
         counter_example = oracle.approx_equivalent(
             set(hypothesis), membership_oracle, formal_concept,
-            closure_operator, i, 0.1, 0.1)
+            closure_operator, i, epsilon, delta)
 
         if counter_example['value'] is None:
             break

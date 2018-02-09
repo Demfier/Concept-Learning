@@ -89,12 +89,13 @@ if __name__ == '__main__':
     print("Star Alliance Airlines example")
     print(concepts)
     concepts.computeCanonicalBasis()
-    print(concepts.canonical_basis)
+    for impl in concepts.canonical_basis:
+        print(impl)
     print(time.clock() - start)
 
     # write to a dot file
     # Note: use linux command dot starAlliance.dot -Tpng -o starAlliance.png
     # to convert the dot file to png
-    dotfile = open('starAlliance.dot', "w")
-    concepts.dotPrint(dotfile)
-    dotfile.close()
+    # dotfile = open('starAlliance.dot', "w")
+    # concepts.dotPrint(dotfile)
+    # dotfile.close()

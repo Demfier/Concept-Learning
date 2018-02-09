@@ -65,6 +65,6 @@ if __name__ == '__main__':
     # write to a dot file
     # Note: use linux command dot starAlliance.dot -Tpng -o starAlliance.png
     # to convert the dot file to png
-    dotfile = open('wines.dot', "w")
-    concepts.dotPrint(dotfile)
-    dotfile.close()
+    # dotfile = open('wines.dot', "w")
+    # concepts.dotPrint(dotfile)
+    # dotfile.close()

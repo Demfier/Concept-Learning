@@ -73,22 +73,22 @@ class formalConcept:
         ccopy.visited = self.visited
         return ccopy
 
-    def __cmp__(self, other):
-        """lectic order on intentIndexes."""
-        if self.intentIndexes == other.intentIndexes:
-            return 0
-        i1 = 0
-        i2len = len(other.intentIndexes)
-        for a1 in self.intentIndexes:
-            if i1 >= i2len:
-                return 1
-            a2 = other.intentIndexes[i1]
-            if a1 > a2:
-                return -1
-            elif a1 < a2:
-                return 1
-            i1 += 1
-        return -1
+    # def __cmp__(self, other):
+    #     """lectic order on intentIndexes."""
+    #     if self.intentIndexes == other.intentIndexes:
+    #         return 0
+    #     i1 = 0
+    #     i2len = len(other.intentIndexes)
+    #     for a1 in self.intentIndexes:
+    #         if i1 >= i2len:
+    #             return 1
+    #         a2 = other.intentIndexes[i1]
+    #         if a1 > a2:
+    #             return -1
+    #         elif a1 < a2:
+    #             return 1
+    #         i1 += 1
+    #     return -1
 
     def __lt__(self, other):
         """lectic order on intentIndexes"""
@@ -404,15 +404,17 @@ class formalConcepts:
 
         # Computes canonical basis using horn1 algorithm. Involves member? and
         # equivalent? oracles
-        self.canonical_basis = basis.horn1(self,
-                                           aclose,
-                                           oracle.member,
-                                           oracle.equivalent)
+        # self.canonical_basis = basis.horn1(self,
+        #                                    aclose,
+        #                                    oracle.member,
+        #                                    oracle.equivalent)
 
         # Computes pac-basis
-        # self.canonical_basis = basis.pac_basis(self,
-        #                                        aclose,
-        #                                        oracle.member)
+        self.canonical_basis = basis.pac_basis(self,
+                                               aclose,
+                                               oracle.member,
+                                               epsilon=0.2,
+                                               delta=0.3)
         print("Done computing canonical basis")
 
     def computeMinExtentLattice(self, minextent=0):
