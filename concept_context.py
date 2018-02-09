@@ -413,8 +413,8 @@ class formalConcepts:
         self.canonical_basis = basis.pac_basis(self,
                                                aclose,
                                                oracle.member,
-                                               epsilon=0.2,
-                                               delta=0.3)
+                                               epsilon=0.1,
+                                               delta=0.1)
         print("Done computing canonical basis")
 
     def computeMinExtentLattice(self, minextent=0):

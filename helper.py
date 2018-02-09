@@ -50,12 +50,12 @@ def iterLCS(pdf):
     pdf['deleted'] = [item for item in sw1.split('#') if len(item) > 0]
 
     if len(pdf['deleted']) == 0:
-        pdf['deleted'] = ['ϵ']
+        pdf['deleted'] = ['']
 
     pdf['added'] = [item for item in sw2.split('!') if len(item) > 0]
 
     if len(pdf['added']) == 0:
-        pdf['added'] = ['ϵ']
+        pdf['added'] = ['']
     return pdf
 
 
