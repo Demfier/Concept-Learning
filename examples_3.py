@@ -31,7 +31,7 @@ if __name__ == '__main__':
     concepts = cnct.formalConcepts(relation)
     start = time.clock()
     concepts.computeLattice()
-    print("Star Alliance Airlines example")
+    print("Triangles example")
     print(concepts)
     concepts.computeCanonicalBasis()
     for impl in concepts.canonical_basis:
@@ -40,6 +40,6 @@ if __name__ == '__main__':
     # write to a dot file
     # Note: use linux command dot starAlliance.dot -Tpng -o starAlliance.png
     # to convert the dot file to png
-    dotfile = open('starAlliance_2.dot', "w")
+    dotfile = open('triangles.dot', "w")
     concepts.dotPrint(dotfile)
     dotfile.close()

@@ -29,7 +29,7 @@ def equivalent(_input_set, formal_concept, membership_oracle,
     Here _input_set (H) is a set of implications of the form A --> B,
     context_intents = Int(K)"""
     if not isinstance(_input_set, set):
-        print "Inputs must be a set for the equivalence query"
+        print("Inputs must be a set for the equivalence query")
     else:
         # input = intents
         for i in range(pow(2, len(formal_concept.context.attributes))):
@@ -59,7 +59,7 @@ def approx_equivalent(_input_set, membership_oracle, formal_concept,
 def subset(restricted=False):
     """Will tell if the input is a subset of the target hypothesis"""
     if not isinstance(_input, set):
-        print "Input must be a set for the subset query"
+        print("Input must be a set for the subset query")
     else:
         # _input ⊆ targetHypothesis
         if _input.issubset(targetHypothesis):
@@ -72,7 +72,7 @@ def subset(restricted=False):
 def superset(restricted=False):
     """Will tell if the input is a superset of the target hypothesis"""
     if not isinstance(_input, set):
-        print "Input must be a set for the superset query"
+        print("Input must be a set for the superset query")
     else:
         # _input ⊇ targetHypothesis
         if _input.issuperset(targetHypothesis):
@@ -85,7 +85,7 @@ def superset(restricted=False):
 def disjoint(restricted=False):
     """Will tell if the input is disjoint from target hypothesis"""
     if not isinstance(_input, set):
-        print "Input must be a set for the disjointness query"
+        print("Input must be a set for the disjointness query")
     else:
         # _input ∩ targetHyothesis = ϕ
         if _input.intersection(targetHypothesis) == set([]):

@@ -90,6 +90,28 @@ class formalConcept:
             i1 += 1
         return -1
 
+    def __lt__(self, other):
+        """lectic order on intentIndexes"""
+        if self.intentIndexes == other.intentIndexes:
+            return -1
+        i1 = 0
+        i2len = len(other.intentIndexes)
+        for a1 in self.intentIndexes:
+            if i1 >= i2len:
+                return 1
+            a2 = other.intentIndexes[i1]
+            if a1 > a2:
+                return -1
+            elif a1 < a2:
+                return 1
+            i1 += 1
+        return -1
+
+    def __eq__(self, other):
+        if set(self.intentIndexes) == set(other.intentIndexes):
+            return 1
+        return -1
+
     def __repr__(self):
         """ print the concept."""
         strrep = "concept no:" + str(self.cnum) + "\n"
@@ -164,7 +186,7 @@ class formalContext:
         if len(objectSet) == 0:
             return frozenset(self.attributes)
         oiter = iter(objectSet)
-        opr = self.objectsToAttributes[oiter.next()].copy()
+        opr = self.objectsToAttributes[next(oiter)].copy()
         for obj in oiter:
             opr.intersection_update(self.objectsToAttributes[obj])
         return frozenset(opr)
@@ -175,7 +197,7 @@ class formalContext:
         if len(attributeSet) == 0:
             return frozenset(self.objects)
         aiter = iter(attributeSet)
-        apr = self.attributesToObjects[aiter.next()].copy()
+        apr = self.attributesToObjects[next(aiter)].copy()
         for att in aiter:
             apr.intersection_update(self.attributesToObjects[att])
         return frozenset(apr)
@@ -254,7 +276,7 @@ class formalConcepts:
         # find all upper neighbours by Lindig's theorem:
         # a concept C=((G u g)'',(G u g)') is an upper neighbour of (G,I) iff
         # (G u g)'' \ G = set of all g which generated C.
-        for intent, generatingObjects in upperNeighbourCandidates.iteritems():
+        for intent, generatingObjects in upperNeighbourCandidates.items():
             extraObjects = self.intentToConceptDict[intent].extent.difference(
                 concept.extent)
             if extraObjects == generatingObjects:
@@ -304,7 +326,7 @@ class formalConcepts:
         # find all lower neighbours by dual of Lindig's theorem:
         # a concept C=((I u i)',(I u i)'') is a lower neighbour of (G,I) iff
         # (I u i)'' \ I = set of all i which generated C.
-        for extent, generatingAttributes in lowerNeighbourCandidates.iteritems():
+        for extent, generatingAttributes in lowerNeighbourCandidates.items():
             extraAttributes = self.extentToConceptDict[extent].intent.difference(
                 concept.intent)
             if extraAttributes == generatingAttributes:
@@ -320,7 +342,7 @@ class formalConcepts:
         for curConcept in self.concepts:
             curConcept.cnum = curConNum
             if curConNum % 1000 == 0:
-                print "computing introduced objects and attributes for concept %d of %d" % (curConNum, numCon)
+                print("computing introduced objects and attributes for concept %d of %d" % (curConNum, numCon))
             curConcept.upperNeighbours.sort()
             curConcept.lowerNeighbours.sort()
             curConcept.introducedObjects = set(curConcept.extent)
@@ -330,7 +352,7 @@ class formalConcepts:
             for un in curConcept.upperNeighbours:
                 curConcept.introducedAttributes.difference_update(un.intent)
             curConNum += 1
-        print "Done with introduced objects and attributes"
+        print("Done with introduced objects and attributes")
 
     def computeLattice(self):
         """ Computes concepts and lattice. self.concepts contains lectically
@@ -362,11 +384,11 @@ class formalConcepts:
             curConcept = self.concepts[curConceptIndex]
             numComputedConcepts += 1
             if numComputedConcepts % 1000 == 0:
-                print "Computed upper neighbours of %d concepts" % numComputedConcepts, gc.collect()
+                print("Computed upper neighbours of %d concepts" % numComputedConcepts, gc.collect())
                 sys.stdout.flush()
 
         self.numberConceptsAndComputeIntroduced()
-        print "Done computing lattice"
+        print("Done computing lattice")
 
     def computeCanonicalBasis(self, close=closure_operators.lin_closure,
                               imp_basis=[]):
@@ -391,7 +413,7 @@ class formalConcepts:
         # self.canonical_basis = basis.pac_basis(self,
         #                                        aclose,
         #                                        oracle.member)
-        print "Done computing canonical basis"
+        print("Done computing canonical basis")
 
     def computeMinExtentLattice(self, minextent=0):
         """ Computes concepts and lattice. self.concepts contains lectically
@@ -423,7 +445,7 @@ class formalConcepts:
             curConcept = self.concepts[curConceptIndex]
             numComputedConcepts += 1
             if numComputedConcepts % 100 == 0:
-                print "Computed lower neighbours of %d concepts" % numComputedConcepts, gc.collect()
+                print("Computed lower neighbours of %d concepts" % numComputedConcepts, gc.collect())
                 sys.stdout.flush()
 
         self.numberConceptsAndComputeIntroduced()
@@ -572,7 +594,7 @@ class formalConcepts:
         return upperNeighbours
 
     def recomputeNeighbours(self):
-        print "recomputing concept order"
+        print("recomputing concept order")
         sys.stdout.flush()
         numdone = 0
         for con in self.concepts:
@@ -580,10 +602,10 @@ class formalConcepts:
             con.upperNeighbours = []
             numdone += 1
             if numdone % 100 == 0:
-                print ".",
-                sys.stdout.flush()
+                print(".",
+                      sys.stdout.flush())
         print
-        print "%d lower neighbours done. Recomputing upper neighbours." % numdone
+        print("%d lower neighbours done. Recomputing upper neighbours." % numdone)
         sys.stdout.flush()
         # recompute upper neighbours
         for con in self.concepts:
@@ -609,14 +631,14 @@ class formalConcepts:
                 self.delConceptFromDicts(con)
                 numpruned += 1
                 if numpruned % 100 == 0:
-                    print ".",
-                    sys.stdout.flush()
+                    print(".",
+                          sys.stdout.flush())
             else:
                 prunedConceptList += [con]
 
         self.concepts = prunedConceptList
         print
-        print "Pruned %d concepts" % numpruned
+        print("Pruned %d concepts" % numpruned)
         self.recomputeNeighbours()
         return numpruned
 
@@ -667,9 +689,9 @@ class formalConcepts:
             self.computeClosestIntroducedAttributesConcept(curCon, num)
             i += 1
             if i % 1000 == 0:
-                print "Named %d of %d concepts" % (i, totnum)
+                print("Named %d of %d concepts" % (i, totnum))
 
-        print "Named %d concepts" % totnum
+        print("Named %d concepts" % totnum)
 
     def findClosestIntroducedAttributes(self, concept, num):
         """Find at least num attributes that were introduced closest to concept
@@ -695,20 +717,20 @@ class formalConcepts:
         objSet = self.context.attributesPrime(attSet)
         if len(objSet) == 0:
             # empty extent -- no object matches search
-            print "EMPTY EXTENT"
+            print("EMPTY EXTENT")
             return None
         attSet = self.context.objectsPrime(objSet)
         searchCon = formalConcept(
             objSet, attSet, self.context.indexList(attSet))
         searchConIndex = bisect.bisect_left(self.concepts, searchCon)
-        print "Looking for ", attSet
-        print "IDX ", searchConIndex
+        print("Looking for ", attSet)
+        print("IDX ", searchConIndex)
         if searchConIndex == len(self.concepts):
             # not found in graph. Could insert instead?
             return None
         # look for next lower neighbour
         for lnidx in range(searchConIndex, len(self.concepts)):
-            print "CMP ", self.concepts[lnidx].intent, " to ", attSet
+            print("CMP ", self.concepts[lnidx].intent, " to ", attSet)
             if self.concepts[lnidx].intent.issuperset(attSet):
                 return self.concepts[lnidx]
 
@@ -772,7 +794,7 @@ class formalConcepts:
         if newConIndex < len(
                 self.concepts) and self.concepts[newConIndex].intent == intent:
             # concept already exists
-            print "FOUND ", self.concepts[newConIndex].intent, intent
+            print("FOUND ", self.concepts[newConIndex].intent, intent)
             return (self.concepts[newConIndex], False)
         self.concepts.insert(newConIndex, newCon)
 
@@ -837,15 +859,15 @@ class formalConcepts:
             colorlist = ["black"]
 
         edges = ""
-        print >> outStream, "digraph lattice {"
+        print("digraph lattice {", file=outStream)
         for con in self.concepts:
 
             color = colorlist[con.cnum % len(colorlist)]
 
             if extentView is not None:
                 extentImg = extentView(con.extent, con.intent)
-                print >> outStream, "node{0:d} [shapefile=\"{1:s}\",label=\"\",color=\"{2:s}\"]".format(
-                    con.cnum, extentImg, color)
+                print("node{0:d} [shapefile=\"{1:s}\",label=\"\",color=\"{2:s}\"]".format(
+                    con.cnum, extentImg, color), file=outStream)
             else:
                 if showAttributes == "all":
                     intentStr = "\\n".join(map(str, con.intent))
@@ -865,27 +887,27 @@ class formalConcepts:
                 if extentStr[-2:] == "\\n":
                     extentStr = extentStr[:-2]
 
-                print >> outStream, "node{0:d} [color={1:s}, shape=Mrecord, style=bold,label=\"{0:02d}|{2:s}|{3:s}\"]".format(
-                    con.cnum, color, extentStr, intentStr)
+                print("node{0:d} [color={1:s}, shape=Mrecord, style=bold,label=\"{0:02d}|{2:s}|{3:s}\"]".format(
+                    con.cnum, color, extentStr, intentStr), file=outStream)
 
             for lneigh in con.lowerNeighbours:
                 edges += "node{0:d} -> node{1:d} [color={2:s}]\n".format(
                     con.cnum, lneigh.cnum, colorlist[lneigh.cnum % len(colorlist)])
 
-        print >> outStream, edges[:-1]
-        print >> outStream, "}"
+        print(edges[:-1], file=outStream)
+        print("}", file=outStream)
 
     def __repr__(self):
         strrep = "Number of concepts: " + str(len(self.concepts)) + "\n"
         for cnum in range(len(self.concepts)):
             if cnum % 10 == 0:
-                print "printing at concept %d of %d " % (cnum, len(self.concepts))
+                print("printing at concept %d of %d " % (cnum, len(self.concepts)))
             strrep += "---------------------------\n"
             strrep += repr(self.concepts[cnum])
             strrep += "naming suggestion:" + reduce(lambda x, y: str(x) + ',' + str(
                 y), self.findClosestIntroducedAttributes(self.concepts[cnum], 3), '') + "\n"
             strrep += "---------------------------\n"
-        print "Returning string representation of lattice"
+        print("Returning string representation of lattice")
         return strrep
 
     def __getstate__(self):
