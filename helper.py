@@ -19,9 +19,10 @@ def lcs(s1, s2):
     longest = ""
     i = 0
     for x in s1:
-        if re.search(x, s2):
+        # Use re.escape to avoid errors if while cards are present in the query
+        if re.search(re.compile(re.escape(x)), s2):
             s = x
-            while re.search(s, s2):
+            while re.search(re.compile(re.escape(s)), s2):
                 if len(s) > len(longest):
                     longest = s
                 if i+len(s) == len(s1):

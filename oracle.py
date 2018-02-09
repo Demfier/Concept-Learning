@@ -104,8 +104,8 @@ def genCounterExample(formal_concept, oracle_type='equivalence'):
     oracles too"""
     if oracle_type == 'equivalence':
         attributes = formal_concept.context.attributes
-        counter_example = set()
-        for attr in attributes:
-            if random.random() > 0.5:
-                counter_example.add(attr)
+        len_counter_example = random.choice(range(1, len(attributes) + 1))
+        selected_index = random.choices(range(len_counter_example),
+                                        k=len_counter_example)
+        counter_example = set([attributes[i] for i in selected_index])
         return counter_example
