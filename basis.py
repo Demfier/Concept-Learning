@@ -247,12 +247,24 @@ def pac_basis(formal_concept, closure_operator, membership_oracle,
     hypothesis = set()
     # NOTE: counter_example is a set
     i = 0  # number of queries
+    spec = 0
+    weak = 0
+    no_resp = 0
+    t_spec = 0
+    t_weak = 0
+    t_no_resp = 0
     while True:
         counter_example = oracle.approx_equivalent(
             set(hypothesis), membership_oracle, formal_concept,
-            closure_operator, i, epsilon, delta)
+            closure_operator, i,
+            {'no_resp': no_resp, 'spec': spec, 'weak': weak},
+            epsilon, delta)
 
         if counter_example['value'] is None:
+            # TODO: Remove this
+            print('# equivalence queries: {0}, # disrespect trigger: {3},\
+ # special trigger: {1}, # weak triggers: {2}'.format(
+                i, t_spec, t_weak, t_no_resp))
             break
 
         if len(hypothesis) == 0:
@@ -271,6 +283,10 @@ def pac_basis(formal_concept, closure_operator, membership_oracle,
                     implication.premise,
                     implication.conclusion.intersection(
                         counter_example['value'])))
+                no_resp += 1
+                t_no_resp += 1
+                weak = 0
+                spec = 0
             else:
                 # special_implication (A --> B) is the first implication
                 # such that it's premise(A) is not a subset of
@@ -290,8 +306,16 @@ def pac_basis(formal_concept, closure_operator, membership_oracle,
                         special_implication.conclusion.union(
                             special_implication.premise.difference(
                                 counter_example['value']))))
+                    spec += 1
+                    t_spec += 1
+                    no_resp = 0
+                    weak = 0
                 else:
                     hypothesis.add(imp.Implication(
                         counter_example['value'],
                         set(formal_concept.context.attributes)))
+                    weak += 1
+                    t_weak += 1
+                    no_resp = 0
+                    spec = 0
     return hypothesis

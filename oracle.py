@@ -44,13 +44,22 @@ def equivalent(_input_set, formal_concept, membership_oracle,
 
 
 def approx_equivalent(_input_set, membership_oracle, formal_concept,
-                      closure_operator, i, epsilon=0.1, delta=0.1):
-    # input = intents
+                      closure_operator, i, counter, epsilon=0.1, delta=0.1):
+    """ _input_set is the hypothesis set
+    counter is a dictionary showing how many times each of the blocks has been
+    triggers continuously
+    """
     l_i = math.floor((i - math.log(delta, 2)) / epsilon)
-    for i in range(int(l_i)):
+    for j in range(int(l_i)):
         sample = genCounterExample(formal_concept)
         is_member = membership_oracle(sample, closure_operator)
         respects = imp.is_respected(_input_set, sample)
+        if i > 5:
+            if counter['no_resp'] < 7 or counter['weak'] > 5 or counter['spec'] > 5:
+                random_impl = random.choice(list(_input_set))
+                # try to forcefully disrespect
+                sample = sample.intersection(random_impl.premise)
+                sample = set(closure_operator(sample))
         if ((is_member and not respects) or (not is_member and respects)):
             return {'bool': False, 'value': sample}
     return {'bool': True, 'value': None}
