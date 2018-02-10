@@ -391,7 +391,7 @@ class formalConcepts:
         print("Done computing lattice")
 
     def computeCanonicalBasis(self, close=closure_operators.lin_closure,
-                              imp_basis=[]):
+                              imp_basis=[], epsilon=0.1, delta=0.1):
         """Computes Duquenne-Guigues basis for the context using
         optimized Ganter algorithm"""
         def aclose(attributes): return closure_operators.aclosure(attributes,
@@ -413,8 +413,8 @@ class formalConcepts:
         self.canonical_basis = basis.pac_basis(self,
                                                aclose,
                                                oracle.member,
-                                               epsilon=0.1,
-                                               delta=0.1)
+                                               epsilon,
+                                               delta)
         print("Done computing canonical basis")
 
     def computeMinExtentLattice(self, minextent=0):
