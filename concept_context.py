@@ -391,30 +391,32 @@ class formalConcepts:
         print("Done computing lattice")
 
     def computeCanonicalBasis(self, close=closure_operators.lin_closure,
-                              imp_basis=[], epsilon=0.1, delta=0.1):
+                              imp_basis=[], epsilon=0.1, delta=0.1,
+                              basis_type=None):
         """Computes Duquenne-Guigues basis for the context using
         optimized Ganter algorithm"""
         def aclose(attributes): return closure_operators.aclosure(attributes,
                                                                   self.context)
         # Computes canonical basis using Ganter's algorithm. Doesn't involve
         # oracles
-        # self.canonical_basis = basis.generalizedComputeDgBasis(
-        #     self.context.attributes, aclose,
-        #     imp_basis=imp_basis, cond=lambda x: True)
-
-        # Computes canonical basis using horn1 algorithm. Involves member? and
-        # equivalent? oracles
-        # self.canonical_basis = basis.horn1(self,
-        #                                    aclose,
-        #                                    oracle.member,
-        #                                    oracle.equivalent)
-
-        # Computes pac-basis
-        self.canonical_basis = basis.pac_basis(self,
+        if not basis_type:
+            self.canonical_basis = basis.generalizedComputeDgBasis(
+                self.context.attributes, aclose,
+                imp_basis=imp_basis, cond=lambda x: True)
+        elif basis_type == 'horn1':
+            # Computes canonical basis using horn1 algorithm. Involves member? and
+            # equivalent? oracles
+            self.canonical_basis = basis.horn1(self,
                                                aclose,
                                                oracle.member,
-                                               epsilon,
-                                               delta)
+                                               oracle.equivalent)
+        elif basis_type == 'pac':
+            # Computes pac-basis
+            self.canonical_basis = basis.pac_basis(self,
+                                                   aclose,
+                                                   oracle.member,
+                                                   epsilon,
+                                                   delta)
         print("Done computing canonical basis")
 
     def computeMinExtentLattice(self, minextent=0):

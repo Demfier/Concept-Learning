@@ -33,7 +33,7 @@ if __name__ == '__main__':
     concepts.computeLattice()
     print("Triangles example")
     print(concepts)
-    concepts.computeCanonicalBasis()
+    concepts.computeCanonicalBasis(epsilon=0.3, delta=0.4, basis_type='pac')
     for impl in concepts.canonical_basis:
         print(impl)
     print(time.clock() - start)

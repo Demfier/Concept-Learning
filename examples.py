@@ -87,7 +87,7 @@ if __name__ == '__main__':
     concepts = cnct.formalConcepts(relation)
     concepts.computeLattice()
     print("Star Alliance Airlines example")
-    concepts.computeCanonicalBasis(epsilon=0.3, delta=0.4)
+    concepts.computeCanonicalBasis(epsilon=0.3, delta=0.4, basis_type='pac')
     for impl in concepts.canonical_basis:
         print(impl)
     print(time.clock() - start)
