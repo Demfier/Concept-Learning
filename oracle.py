@@ -55,7 +55,7 @@ def approx_equivalent(_input_set, membership_oracle, formal_concept,
         is_member = membership_oracle(sample, closure_operator)
         respects = imp.is_respected(_input_set, sample)
         if i > 5:
-            if counter['no_resp'] < 7 or counter['weak'] > 5 or counter['spec'] > 5:
+            if counter['no_resp'] < 8 or counter['weak'] > 2:
                 random_impl = random.choice(list(_input_set))
                 # try to forcefully disrespect
                 sample = sample.intersection(random_impl.premise)
