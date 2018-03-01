@@ -10,7 +10,7 @@ basis of implications](https://link.springer.com/content/pdf/10.1007%2Fs10472-01
 
 ToDo list:
 - [x] FCA Part
-- [ ] PAC Learning
-  - [ ] Implement the dataset sampler
+- [x] PAC Learning
+  - [x] Implement the dataset sampler
   - [x] Complete the approx-equivalent function
   - [x] Implement HORN1
