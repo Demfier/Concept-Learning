@@ -14,3 +14,10 @@ ToDo list:
   - [x] Implement the dataset sampler
   - [x] Complete the approx-equivalent function
   - [x] Implement HORN1
+- [ ] Regex Learning
+  - [ ] Without POS
+  - [ ] Incorporate POS information for potential regex conflicts for different
+        clusters
+- [ ] Evaluation
+  - [ ] Simple overlapping words evaluation
+  - [ ] Original task metric (would require to implement regex)
