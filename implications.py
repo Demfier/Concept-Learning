@@ -89,6 +89,26 @@ class Implication(object):
         return(self.premise == other.premise and
                self.conclusion == other.conclusion)
 
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return(len(self.premise) < len(other.premise))
+
+    def __gt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return(len(self.premise) > len(other.premise))
+
+    def __le__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return(not len(other.premise) < len(self.premise))
+
+    def __ge__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return(not len(self.premise) < len(other.premise))
+
     def is_respected(self, some_set):
         """Checks whether implication repects `some_set or not.
         In other words, is `some_set` a model of implication?"""
