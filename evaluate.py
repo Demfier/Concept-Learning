@@ -72,6 +72,7 @@ def evaluate(train_dir, test_dir):
         implId_opnSeq_map[idx] = operation(premise_data)
 
     word_map = {}
+    correct = 0
     for word in common_words:
         # gt => Ground Truth
         word_map[word] = {'gt': test_data[test_data['source'] == word]['target'].iloc[0]}
@@ -81,10 +82,13 @@ def evaluate(train_dir, test_dir):
                 opn_seq = implId_opnSeq_map[idx].split(' ')
                 output = apply_operation(opn_seq, word)
                 word_map[word]['pac_output'] = output
+                if word_map[word]['gt'] == output:
+                    correct += 1
                 # stop at the first match as basis is sorted by premise length
                 break
-    print(word_map)
-
+    print("{}/{} correct inflections".format(correct, len(common_words)))
+    accuracy = correct / float(len(common_words))
+    return accuracy
 
 def operation(dataframe):
     """Returns the operation sequence most common in the dataframe"""
@@ -139,4 +143,5 @@ def build_relations(data):
 
 
 if __name__ == '__main__':
-    evaluate('data/train/english-train-medium', 'data/test/uncovered/english-uncovered-test')
+    accuracy = evaluate('data/train/english-train-medium', 'data/test/uncovered/english-uncovered-test')
+    print("Accuracy: {}%".format(accuracy*100))
