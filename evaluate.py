@@ -139,4 +139,4 @@ def build_relations(data):
 
 
 if __name__ == '__main__':
-    evaluate('data/train/hindi-train-medium', 'data/test/uncovered/hindi-uncovered-test')
+    evaluate('data/train/english-train-medium', 'data/test/uncovered/english-uncovered-test')
