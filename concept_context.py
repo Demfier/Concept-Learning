@@ -449,7 +449,9 @@ class formalConcepts:
             curConcept = self.concepts[curConceptIndex]
             numComputedConcepts += 1
             if numComputedConcepts % 100 == 0:
-                print("Computed lower neighbours of %d concepts" % numComputedConcepts, gc.collect())
+                print(
+                    "Computed lower neighbours of %d concepts" %
+                    numComputedConcepts, gc.collect())
                 sys.stdout.flush()
 
         self.numberConceptsAndComputeIntroduced()
@@ -609,7 +611,9 @@ class formalConcepts:
                 print(".",
                       sys.stdout.flush())
         print
-        print("%d lower neighbours done. Recomputing upper neighbours." % numdone)
+        print(
+            "%d lower neighbours done. Recomputing upper neighbours." %
+            numdone)
         sys.stdout.flush()
         # recompute upper neighbours
         for con in self.concepts:
@@ -870,8 +874,9 @@ class formalConcepts:
 
             if extentView is not None:
                 extentImg = extentView(con.extent, con.intent)
-                print("node{0:d} [shapefile=\"{1:s}\",label=\"\",color=\"{2:s}\"]".format(
-                    con.cnum, extentImg, color), file=outStream)
+                print(
+                    "node{0:d} [shapefile=\"{1:s}\",label=\"\",color=\"{2:s}\"]".format(
+                        con.cnum, extentImg, color), file=outStream)
             else:
                 if showAttributes == "all":
                     intentStr = "\\n".join(map(str, con.intent))
@@ -891,8 +896,13 @@ class formalConcepts:
                 if extentStr[-2:] == "\\n":
                     extentStr = extentStr[:-2]
 
-                print("node{0:d} [color={1:s}, shape=Mrecord, style=bold,label=\"{0:02d}|{2:s}|{3:s}\"]".format(
-                    con.cnum, color, extentStr, intentStr), file=outStream)
+                print(
+                    "node{0:d} [color={1:s}, shape=Mrecord, style=bold,label=\"{0:02d}|{2:s}|{3:s}\"]".format(
+                        con.cnum,
+                        color,
+                        extentStr,
+                        intentStr),
+                    file=outStream)
 
             for lneigh in con.lowerNeighbours:
                 edges += "node{0:d} -> node{1:d} [color={2:s}]\n".format(
@@ -905,7 +915,8 @@ class formalConcepts:
         strrep = "Number of concepts: " + str(len(self.concepts)) + "\n"
         for cnum in range(len(self.concepts)):
             if cnum % 10 == 0:
-                print("printing at concept %d of %d " % (cnum, len(self.concepts)))
+                print("printing at concept %d of %d " %
+                      (cnum, len(self.concepts)))
             strrep += "---------------------------\n"
             strrep += repr(self.concepts[cnum])
             strrep += "naming suggestion:" + reduce(lambda x, y: str(x) + ',' + str(

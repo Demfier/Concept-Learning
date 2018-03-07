@@ -7,6 +7,7 @@ Evaluation approach currently used in the script:
 4. Compare the resultant with the one given in test set.
 """
 
+import os
 import copy
 import helper
 import operator
@@ -31,14 +32,17 @@ def evaluate(train_dir, test_dir):
     train_data = pd.read_csv(train_dir, sep='\t', names=['source', 'target',
                                                          'pos_info'])
     test_data = pd.read_csv(test_dir, sep='\t', names=['source', 'target',
-                                                         'pos_info'])
+                                                       'pos_info'])
 
     attribute_size = train_data['source'].size
 
     test_data = pd.merge(train_data, test_data, how='inner', on=['source',
-                                                                'target'])
+                                                                 'target'])
     test_data.dropna(inplace=True)
     common_words = test_data['source']
+
+    if len(common_words) == 0:
+        return 0
 
     # process training data
     train_data = train_data.apply(helper.iterLCS, axis=1)
@@ -57,13 +61,17 @@ def evaluate(train_dir, test_dir):
     unique_conclusions = []
     for impl in copy.deepcopy(concepts.canonical_basis):
         if len(impl.conclusion) == attribute_size or len(impl.premise) == 0\
-            or impl.premise == impl.conclusion:
+                or impl.premise == impl.conclusion:
             concepts.canonical_basis.remove(impl)
             continue
         unique_conclusions.append(frozenset(impl.conclusion))
 
     print("Total UNIQUE conclusions: {}\n".format(len(set(unique_conclusions))))
-    concepts.canonical_basis = set(sorted(list(concepts.canonical_basis), reverse=True))
+    concepts.canonical_basis = set(
+        sorted(
+            list(
+                concepts.canonical_basis),
+            reverse=True))
 
     implId_opnSeq_map = {}
     for idx, impl in enumerate(concepts.canonical_basis):
@@ -75,7 +83,8 @@ def evaluate(train_dir, test_dir):
     correct = 0
     for word in common_words:
         # gt => Ground Truth
-        word_map[word] = {'gt': test_data[test_data['source'] == word]['target'].iloc[0]}
+        word_map[word] = {
+            'gt': test_data[test_data['source'] == word]['target'].iloc[0]}
         for idx, impl in enumerate(concepts.canonical_basis):
             # use conclusion as it contains elements of premise too
             if word in impl.conclusion:
@@ -90,6 +99,7 @@ def evaluate(train_dir, test_dir):
     accuracy = correct / float(len(common_words))
     return accuracy
 
+
 def operation(dataframe):
     """Returns the operation sequence most common in the dataframe"""
     counter = {}
@@ -100,6 +110,7 @@ def operation(dataframe):
         except KeyError:
             counter[opn_seq] = 1
     return max(counter.items(), key=operator.itemgetter(1))[0]
+
 
 def apply_operation(operation_sequence, word):
     """Applies operation sequence on the word"""
@@ -122,6 +133,7 @@ def delete(old, word, new='', occurrence=1):
     li = word.rsplit(old, occurrence)
     return(new.join(li))
 
+
 def insert(to_insert, word):
     """Appends to_insert to the word"""
     return(word + to_insert)
@@ -133,7 +145,8 @@ def build_relations(data):
     denote ::operation for delete operations. For eg. ::ना shows delete ना
     """
     relations = []
-    data['deleted'] = data['deleted'].apply(lambda opns: ['::' + opn for opn in opns])
+    data['deleted'] = data['deleted'].apply(
+        lambda opns: ['::' + opn for opn in opns])
     for i, r in data.iterrows():
         attr = r['source']
         objects = r['deleted'] + r['added']
@@ -142,6 +155,34 @@ def build_relations(data):
     return relations
 
 
+def complete_evaluation(training_files, testing_files, level='medium'):
+    for file in copy.copy(training_files):
+        if not file.endswith('-medium'):
+            training_files.remove(file)
+
+    training_files = sorted(training_files)
+    testing_files = sorted(testing_files)
+    assert len(training_files) == len(testing_files)
+    # sort the list so that trainig and testing files are aligned
+
+    accuracies = []
+    for idx, train_file in enumerate(training_files):
+        accuracy = evaluate(
+            TRAIN_DIR +
+            train_file,
+            UNCOV_TEST_DIR +
+            testing_files[idx])
+        accuracies.append(accuracy)
+        print("Language: {}, Accuracy: {}%".format(train_file, accuracy * 100))
+
+    print(
+        "Average accuracy across the entire dataset: {}".format(
+            sum(accuracies) /
+            len(accuracies)))
+
+
 if __name__ == '__main__':
-    accuracy = evaluate('data/train/english-train-medium', 'data/test/uncovered/english-uncovered-test')
-    print("Accuracy: {}%".format(accuracy*100))
+    complete_evaluation(
+        os.listdir(TRAIN_DIR),
+        os.listdir(UNCOV_TEST_DIR),
+        level='medium')
