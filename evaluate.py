@@ -31,6 +31,11 @@ def evaluate(train_dir, test_dir):
     # Load training and testing data into a dataframe
     train_data = pd.read_csv(train_dir, sep='\t', names=['source', 'target',
                                                          'pos_info'])
+    uniq_rows = []
+    print(len(train_data['source'].unique()))
+    for src in train_data['source'].unique():
+        uniq_rows.append(train_data[train_data['source'] == src].iloc[0])
+    train_data = pd.DataFrame.from_records(uniq_rows)
     test_data = pd.read_csv(test_dir, sep='\t', names=['source', 'target',
                                                        'pos_info'])
 
@@ -97,6 +102,7 @@ def evaluate(train_dir, test_dir):
                 break
     print("{}/{} correct inflections".format(correct, len(common_words)))
     accuracy = correct / float(len(common_words))
+    print(word_map)
     return accuracy
 
 
