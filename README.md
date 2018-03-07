@@ -21,3 +21,8 @@ ToDo list:
 - [ ] Evaluation
   - [ ] Simple overlapping words evaluation
   - [ ] Original task metric (would require to implement regex)
+- [ ] Make automated pipeline for the entire dataset and get cumulative results
+- [ ] Modulify the code
+  - [ ] Change directory structure
+  - [ ] Add tests
+  - [ ] Add usage documentation
