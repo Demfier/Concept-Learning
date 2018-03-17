@@ -7,6 +7,7 @@ Implements some helper methods used in the module.
 
 import re
 import string
+import operator
 from itertools import chain, combinations
 
 
@@ -67,3 +68,59 @@ def powerset(iterable):
     """
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(1, len(s)+1))
+
+
+def build_relations(data):
+    """
+    Build attribute -- object (source-word -- operation) relations from
+    processed training data denote ::operation for delete operations.
+    For eg. ::ना shows delete ना
+    """
+    relations = []
+    data['deleted'] = data['deleted'].apply(
+        lambda opns: ['::' + opn for opn in opns])
+    for i, r in data.iterrows():
+        attr = r['source']
+        objects = r['deleted'] + r['added']
+        for obj in objects:
+            relations.append((obj, attr))
+    return relations
+
+
+def operation(dataframe):
+    """Returns the most common operation sequence in the dataframe"""
+    counter = {}
+    for i, r in dataframe.iterrows():
+        opn_seq = ' '.join(r['deleted'] + r['added'])
+        try:
+            counter[opn_seq] += 1
+        except KeyError:
+            counter[opn_seq] = 1
+    return max(counter.items(), key=operator.itemgetter(1))[0]
+
+
+def apply_operation(operation_sequence, word):
+    """Applies operation sequence on the word"""
+    for opn in operation_sequence:
+        if opn.startswith('::'):
+            # delete operation
+            opn = opn[2:]
+            if opn == '':
+                continue
+            else:
+                word = delete(opn, word)
+        else:
+            # insert operation
+            word = insert(opn, word)
+    return word
+
+
+def delete(old, word, new='', occurrence=1):
+    """Removes to_delete from the word"""
+    li = word.rsplit(old, occurrence)
+    return(new.join(li))
+
+
+def insert(to_insert, word):
+    """Appends to_insert to the word"""
+    return(word + to_insert)
