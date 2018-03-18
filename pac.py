@@ -25,6 +25,7 @@ TRAIN_DIR = 'data/train/'
 DEV_DIR = 'data/dev/'
 COV_TEST_DIR = 'data/test/covered/'
 UNCOV_TEST_DIR = 'data/test/uncovered/'
+PAC_DIR = 'data/out/pac/'
 
 
 def calculateAndSavePacBasis(train_dir, test_dir, filter_pac=True):
@@ -113,18 +114,23 @@ def calculateAndSavePacBasis(train_dir, test_dir, filter_pac=True):
                 # stop at the first match as basis is sorted by premise length
                 break
     accuracy = correct / float(len(common_words))
-    return(accuracy, word_map, concepts.canonical_basis)
+    return(accuracy, word_map, concepts.canonical_basis, implId_opnSeq_map)
 
 
 def findAllPacBases(training_files, method='uncov_test', level='medium',
-                    filter_pac=True, best_of=1):
+                    filter_pac=True, best_of=1, start_fresh=False):
     """
     Calculates and stores the best PAC-basis for each of the languages
     """
     if method == 'uncov_test':
         testing_files = os.listdir(UNCOV_TEST_DIR)
+        # remove this file as it's `high` version training file doesn't exist
+        if level == 'high':
+            testing_files.remove('scottish-gaelic-uncovered-test')
     elif method == 'dev':
         testing_files = os.listdir(DEV_DIR)
+        if level == 'high':
+            testing_files.remove('scottish-gaelic-dev')
 
     for file in copy.copy(training_files):
         if not file.endswith(level):
@@ -141,6 +147,8 @@ def findAllPacBases(training_files, method='uncov_test', level='medium',
     acc_wrdMap = {}
     for idx, train_file in enumerate(training_files):
         lang = train_file.split('/')[-1]
+        if lang + '.p' in os.listdir(PAC_DIR) and not start_fresh:
+            continue
         print('*********Finding best pac-basis for {}...**********'.format(lang))
         for i in range(best_of):
             try:
@@ -157,7 +165,7 @@ def findAllPacBases(training_files, method='uncov_test', level='medium',
 
         # Save the best pac-basis for all the languages along with accuracy
         # word-map found for exact matching
-        with open('data/out/pac/' + lang + '.p', 'wb') as pac_out:
+        with open(PAC_DIR + lang + '.p', 'wb') as pac_out:
             pickle.dump(acc_wrdMap[lang], pac_out)
             print('***********Saved best PAC-basis for {} with accuracy {}%!***********'.format(lang, acc_wrdMap[lang][0] * 100))
 
@@ -165,6 +173,6 @@ if __name__ == '__main__':
     findAllPacBases(
         os.listdir(TRAIN_DIR),
         method='uncov_test',
-        level='medium',
+        level='high',
         filter_pac=False,
         best_of=5)
