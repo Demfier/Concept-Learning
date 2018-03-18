@@ -72,8 +72,10 @@ def evaluate(lang, test_dir):
 def complete_evaluation(training_files, method='uncov_test', level='medium'):
     if method == 'uncov_test':
         testing_files = os.listdir(UNCOV_TEST_DIR)
+        TEST_DIR = UNCOV_TEST_DIR
     elif method == 'dev':
         testing_files = os.listdir(DEV_DIR)
+        TEST_DIR = DEV_DIR
 
     for file in copy.copy(training_files):
         if not file.endswith(level):
@@ -82,7 +84,10 @@ def complete_evaluation(training_files, method='uncov_test', level='medium'):
     training_files = sorted(training_files)
     testing_files = sorted(testing_files)
     if len(training_files) != len(testing_files):
-        testing_files = ['-'.join(file.split('-')[:-2]) + '-uncovered-test' for file in training_files]
+        if method == 'uncov_test':
+            testing_files = ['-'.join(file.split('-')[:-2]) + '-uncovered-test' for file in training_files]
+        elif method == 'dev':
+            testing_files = ['-'.join(file.split('-')[:-2]) + '-dev' for file in training_files]
     # sort the list so that trainig and testing files are aligned
 
     # accuracy mapping for a language
@@ -92,18 +97,21 @@ def complete_evaluation(training_files, method='uncov_test', level='medium'):
         try:
             acc_wrdMap[lang].append(evaluate(
                 lang,
-                UNCOV_TEST_DIR + testing_files[idx]))
+                TEST_DIR + testing_files[idx]))
         except KeyError:
             acc_wrdMap[lang] = evaluate(
                 lang,
-                UNCOV_TEST_DIR + testing_files[idx])
+                TEST_DIR + testing_files[idx])
         print(
             "Language: {}, Accuracy: {}%".format(
                 lang,
                 acc_wrdMap[lang][0]))
-
-    with open(EVAL_DIR + 'eval_regex_' + level + '.json', 'w') as re_out:
-        json.dump(acc_wrdMap, re_out)
+    if method == 'uncov_test':
+        with open(EVAL_DIR + '/uncov/eval_regex_' + level + '.json', 'w') as re_out:
+            json.dump(acc_wrdMap, re_out)
+    elif method == 'dev':
+        with open(EVAL_DIR + '/dev/eval_regex_' + level + '.json', 'w') as re_out:
+            json.dump(acc_wrdMap, re_out)
 
 
 if __name__ == '__main__':
