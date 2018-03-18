@@ -15,7 +15,7 @@ ToDo list:
   - [x] Complete the approx-equivalent function
   - [x] Implement HORN1
 - [ ] Regex Learning
-  - [ ] Without POS
+  - [x] Without POS
   - [ ] Incorporate POS information for potential regex conflicts for different
         clusters
 - [ ] Evaluation
