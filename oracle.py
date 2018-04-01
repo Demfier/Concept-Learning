@@ -60,8 +60,8 @@ def approx_equivalent(_input_set, membership_oracle, formal_concept,
                 # try to forcefully disrespect
                 sample = sample.intersection(random_impl.premise)
                 sample = set(closure_operator(sample))
-                # is_member = membership_oracle(sample, closure_operator)
-                # respects = imp.is_respected(_input_set, sample)
+                is_member = membership_oracle(sample, closure_operator)
+                respects = imp.is_respected(_input_set, sample)
         if ((is_member and not respects) or (not is_member and respects)):
             return {'bool': False, 'value': sample}
     return {'bool': True, 'value': None}

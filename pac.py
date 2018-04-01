@@ -28,7 +28,7 @@ UNCOV_TEST_DIR = 'data/test/uncovered/'
 PAC_DIR = 'data/out/pac/'
 
 
-def calculateAndSavePacBasis(train_dir, test_dir, filter_pac=True):
+def calculateAndSavePacBasis(train_dir, filter_pac=True):
     """
     Parameters:
     -----------------
@@ -37,97 +37,82 @@ def calculateAndSavePacBasis(train_dir, test_dir, filter_pac=True):
     """
 
     # Load training and testing data into a dataframe
+    pac_per_pos = dict()
     train_data = pd.read_csv(train_dir, sep='\t', names=['source', 'target',
                                                          'pos_info'])
-    uniq_rows = []
-    for src in train_data['source'].unique():
-        try:
-            uniq_rows.append(train_data[train_data['source'] == src].iloc[0])
-        except IndexError:
-            continue
-    train_data = pd.DataFrame.from_records(uniq_rows)
-    test_data = pd.read_csv(test_dir, sep='\t', names=['source', 'target',
-                                                       'pos_info'])
 
-    attribute_size = train_data['source'].size
+    uniq_pos_list = train_data['pos_info'].unique()
+    uniq_pos = set()
+    for pos_group in uniq_pos_list:
+        for pos in pos_group.split(';'):
+            uniq_pos.add(pos)
+    for pos in uniq_pos:
+        print("for pos ==> {}".format(pos))
+        temp_train_data = []
+        for row in train_data.iterrows():
+            if pos in row[1]['pos_info'].split(';'):
+                temp_train_data.append(row[1])
+            else:
+                continue
+        temp_train_data = pd.DataFrame.from_records(temp_train_data)
 
-    test_data = pd.merge(train_data, test_data, how='inner', on=['source',
-                                                                 'target'])
-    test_data.dropna(inplace=True)
-    common_words = test_data['source']
+        attribute_size = temp_train_data['source'].size
 
-    if len(common_words) == 0:
-        return(0, {})
+        # process training data
+        temp_train_data = temp_train_data.apply(helper.iterLCS, axis=1)
 
-    # process training data
-    train_data = train_data.apply(helper.iterLCS, axis=1)
+        relations = helper.build_relations(temp_train_data)
 
-    relations = helper.build_relations(train_data)
+        # Build the concept lattice
+        concepts = cn.formalConcepts(relations)
+        concepts.computeLattice()
 
-    # Build the concept lattice
-    concepts = cn.formalConcepts(relations)
-    concepts.computeLattice()
+        # Find canonical basis
+        concepts.computeCanonicalBasis(epsilon=0.1, delta=0.1, basis_type='pac')
 
-    # Find canonical basis
-    concepts.computeCanonicalBasis(epsilon=0.1, delta=0.1, basis_type='pac')
+        print("Total implications: {}\n".format(len(concepts.canonical_basis)))
 
-    print("Total implications: {}\n".format(len(concepts.canonical_basis)))
-
-    unique_conclusions = []
-    for impl in copy.deepcopy(concepts.canonical_basis):
-        if len(impl.premise) == 0:
-            concepts.canonical_basis.remove(impl)
-        if filter_pac:
-            # Remove implications of the form C --> M and C --> C
-            if impl.premise == impl.conclusion or len(
-                    impl.conclusion) == attribute_size:
+        unique_conclusions = []
+        for impl in copy.deepcopy(concepts.canonical_basis):
+            if len(impl.premise) == 0:
                 concepts.canonical_basis.remove(impl)
-        unique_conclusions.append(frozenset(impl.conclusion))
+            if filter_pac:
+                # Remove implications of the form C --> M and C --> C
+                if impl.premise == impl.conclusion or len(
+                        impl.conclusion) == attribute_size:
+                    concepts.canonical_basis.remove(impl)
+            unique_conclusions.append(frozenset(impl.conclusion))
 
-    print("Total UNIQUE conclusions: {}\n".format(len(set(unique_conclusions))))
-    concepts.canonical_basis = set(
-        sorted(
-            list(
-                concepts.canonical_basis),
-            reverse=True))
+        print("Total UNIQUE conclusions: {}\n".format(len(set(unique_conclusions))))
+        concepts.canonical_basis = set(
+            sorted(
+                list(
+                    concepts.canonical_basis),
+                reverse=True))
 
-    implId_opnSeq_map = {}
-    for idx, impl in enumerate(concepts.canonical_basis):
-        premise = train_data['source'].isin(impl.premise)
-        premise_data = train_data[premise]
-        implId_opnSeq_map[idx] = helper.operation(premise_data)
-
-    word_map = {}
-    correct = 0
-    for word in common_words:
-        # gt => Ground Truth
-        word_map[word] = {
-            'gt': test_data[test_data['source'] == word]['target'].iloc[0]}
+        implId_opnSeq_map = {}
         for idx, impl in enumerate(concepts.canonical_basis):
-            # use conclusion as it contains elements of premise too
-            if word in impl.conclusion:
-                opn_seq = implId_opnSeq_map[idx].split(' ')
-                output = helper.apply_operation(opn_seq, word)
-                word_map[word]['pac_output'] = output
-                if word_map[word]['gt'] == output:
-                    correct += 1
-                # stop at the first match as basis is sorted by premise length
-                break
-    accuracy = correct / float(len(common_words))
-    return(accuracy, word_map, concepts.canonical_basis, implId_opnSeq_map)
+            premise = temp_train_data['source'].isin(impl.premise)
+            premise_data = temp_train_data[premise]
+            implId_opnSeq_map[idx] = helper.operation(premise_data)
+
+        pac_per_pos[pos] = (concepts.canonical_basis, implId_opnSeq_map)
+    return pac_per_pos
 
 
 def findAllPacBases(training_files, method='uncov_test', level='medium',
-                    filter_pac=True, best_of=1, start_fresh=False):
+                    filter_pac=True, start_fresh=False):
     """
-    Calculates and stores the best PAC-basis for each of the languages
+    Calculates and stores the best PAC-basis per POS config per language
     """
     if method == 'uncov_test':
         testing_files = os.listdir(UNCOV_TEST_DIR)
+        test_dir = UNCOV_TEST_DIR
         # remove this file as it's `high` version training file doesn't exist
         if level == 'high':
             testing_files.remove('scottish-gaelic-uncovered-test')
     elif method == 'dev':
+        test_dir = DEV_DIR
         testing_files = os.listdir(DEV_DIR)
         if level == 'high':
             testing_files.remove('scottish-gaelic-dev')
@@ -141,38 +126,34 @@ def findAllPacBases(training_files, method='uncov_test', level='medium',
     assert len(training_files) == len(testing_files)
     # sort the list so that trainig and testing files are aligned
 
-    # Accuracy mapping for a language. It stores accuracies for `best_of`
-    # number of PAC-bases. This is required because we don't get the best
-    # PAC-basis in one shot
     acc_wrdMap = {}
     for idx, train_file in enumerate(training_files):
         lang = train_file.split('/')[-1]
-        if lang + '.p' in os.listdir(PAC_DIR) and not start_fresh:
-            continue
+        # if lang + '.p' in os.listdir(PAC_DIR) and not start_fresh:
+        #     continue
         print('*********Finding best pac-basis for {}...**********'.format(lang))
-        for i in range(best_of):
-            try:
-                acc_wrdMap[lang].append(calculateAndSavePacBasis(
-                    TRAIN_DIR + train_file,
-                    UNCOV_TEST_DIR + testing_files[idx],
-                    filter_pac))
-            except KeyError:
-                acc_wrdMap[lang] = [calculateAndSavePacBasis(
-                    TRAIN_DIR + train_file,
-                    UNCOV_TEST_DIR + testing_files[idx],
-                    filter_pac)]
-        acc_wrdMap[lang] = max(acc_wrdMap[lang], key=operator.itemgetter(0))
+        pac_per_pos = calculateAndSavePacBasis(
+            TRAIN_DIR + train_file,
+            filter_pac)
+        try:
+            for pos in pac_per_pos:
+                acc_wrdMap[lang][pos].append(pac_per_pos[pos])
+        except KeyError:
+            acc_wrdMap[lang] = {pos: [pac_per_pos[pos]]}
+
+        for pos in copy.deepcopy(acc_wrdMap[lang]):
+            acc_wrdMap[lang][pos] = max(acc_wrdMap[lang][pos], key=operator.itemgetter(0))
 
         # Save the best pac-basis for all the languages along with accuracy
         # word-map found for exact matching
-        with open(PAC_DIR + lang + '.p', 'wb') as pac_out:
-            pickle.dump(acc_wrdMap[lang], pac_out)
-            print('***********Saved best PAC-basis for {} with accuracy {}%!***********'.format(lang, acc_wrdMap[lang][0] * 100))
+        for pos in acc_wrdMap[lang]:
+            print('***********Saved best PAC-basis for {} at POS {} with accuracy {}%!***********'.format(lang, pos, acc_wrdMap[lang][pos][0] * 100))
+        # with open(PAC_DIR + lang + '.p', 'wb') as pac_out:
+        #     pickle.dump(acc_wrdMap[lang], pac_out)
 
 if __name__ == '__main__':
     findAllPacBases(
         os.listdir(TRAIN_DIR),
-        method='uncov_test',
-        level='high',
-        filter_pac=False,
-        best_of=5)
+        method='dev',
+        level='low',
+        filter_pac=False)
